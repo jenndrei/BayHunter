@@ -36,8 +36,8 @@ More background information about how to chose the best parameters, and about Ba
 
 ### References
 
-* SWD forward modeling is based on surf96 from [CPS](http://www.eas.slu.edu/eqc/eqccps.html) from Rob Herrmann, St. Louis University: BayHunter uses the [python wrapper](https://github.com/miili/pysurf96) from Marius Isken wrapping the
-[quick surf96 routine](https://github.com/caiweicaiwei/SurfTomo) from Hongjian Fang.
+* SWD forward modeling is based on surf96 from [CPS](http://www.eas.slu.edu/eqc/eqccps.html) from Rob Herrmann, St. Louis University: BayHunter uses the python wrapper [pysurf96](https://github.com/miili/pysurf96) from Marius Isken wrapping the
+quick surf96 routine [SurfTomo](https://github.com/caiweicaiwei/SurfTomo) from Hongjian Fang.
 * RF forward modeling using [rfmini](https://git.gfz-potsdam.de/saul/rfmini) from Joachim Saul, GFZ.
 * Most influence offered the work from Bodin et al., 2012: *Transdimensional inversion of receiver functions and surface wave dispersion*.
 
