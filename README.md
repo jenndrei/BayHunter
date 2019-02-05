@@ -1,10 +1,12 @@
+# BayHunter
+
 BayHunter is a Python tool to perform an McMC transdimensional Bayesian inversion of receiver functions (RF) and surface wave dispersion (SWD), i.e. inverting for the velocity-depth structure, the number of layers and noise parameters (noise correlation and amplitude). Forward modeling codes are provided within this package (RF: rfmini, SWD: quick routine based on surf96), but are easily replacable with own codes. You can also add (completely different) data sets that you wish to invert for.
 
 **Citation:**
 
 ... coming soon
 
-# Quick start
+## Quick start
 
 ### Requirements
 * matplotlib
@@ -39,7 +41,7 @@ More background information about how to chose the best parameters, and about Ba
 * RF forward modeling using [rfmini](https://git.gfz-potsdam.de/saul/rfmini) from Joachim Saul, GFZ.
 * Most influence offered the work from Bodin et al., 2012: *Transdimensional inversion of receiver functions and surface wave dispersion*.
 
-# Outlook and Feedback
+## Outlook and Feedback
 
 **BayHunter is ready to use**. It is quick and efficient and I am happy with the performance. Still, there are always things that can be improved to make it even faster and more efficient, and user friendlier.  
 
@@ -52,6 +54,6 @@ Thus, we could eliminate some problems. However, each data set and each inversio
 
 I am happy to share my experience with you and also if you share your thoughts with me. I am looking forward to your feedback. 
 
-# Who am I?
+## Who am I?
 
 I am Jennifer Dreiling, final sprint PhD candidate at GFZ (German Research Center for Geosciences) in Potsdam, Germany. BayHunter was created by me in the frame of my PhD program. [Contact me](https://www.gfz-potsdam.de/en/staff/jennifer-dreiling/).
