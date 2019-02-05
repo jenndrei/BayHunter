@@ -104,13 +104,13 @@ targets = Targets.JointTarget(targets=[target1, target2])
 # also simply define the dictionaries directly in the script, if you don't want
 # to use a config.ini file. Or update the dictionaries as follows, e.g. if you
 # have station specific values, etc.
-# See README for explanation of parameters
+# See docs/bayhunter.pdf for explanation of parameters
 
 priors.update({'mohoest': (38, 4),  # optional, moho estimate (mean, std)
                'rfnoise_corr': 0.92,
-               'swnoise_corr': 0.
+               'swdnoise_corr': 0.
                # 'rfnoise_sigma': np.std(yrf_err),  # fixed to true value
-               # 'swnoise_sigma': np.std(ysw_err),  # fixed to true value
+               # 'swdnoise_sigma': np.std(ysw_err),  # fixed to true value
                })
 
 initparams.update({'nchains': 5,
@@ -124,11 +124,12 @@ initparams.update({'nchains': 5,
 #  -------------------------------------------------------  MCMC BAY INVERSION
 #
 # Save configfile for baywatch. refmodel must not be defined.
-utils.save_baywatch_config(targets, priors, path='.', refmodel=truemodel)
-optimizer = MCMC_Optimizer(targets, initparams=initparams, modelpriors=priors,
+utils.save_baywatch_config(targets, path='.', priors=priors,
+                           initparams=initparams, refmodel=truemodel)
+optimizer = MCMC_Optimizer(targets, initparams=initparams, priors=priors,
                            random_seed=None)
 # default for the number of threads is the amount of cpus == one chain per cpu.
-# if baywatch is True, inversion status is continuously (dtsend) send out
+# if baywatch is True, inversion data is continuously send out (dtsend)
 # to be received by BayWatch (see below).
 optimizer.mp_inversion(nthreads=6, baywatch=True, dtsend=1)
 
@@ -139,10 +140,10 @@ path = initparams['savepath']
 cfile = '%s_config.pkl' % initparams['station']
 configfile = op.join(path, 'data', cfile)
 obj = PlotFromStorage(configfile)
-# The final distributions will be saved. Beforehand, outlier chains will be
-# excluded. Outlier chains are defined as chains with a likelihood deviation
-# of dev * 100 % from the average posterior likelihood of the best chain. If
-# not wished, set large.
+# The final distributions will be saved with save_final_distribution.
+# Beforehand, outlier chains will be detected and excluded.
+# Outlier chains are defined as chains with a likelihood deviation
+# of dev * 100 % from the median posterior likelihood of the best chain.
 obj.save_final_distribution(maxmodels=100000, dev=0.05)
 # Save a selection of important plots
 obj.save_plots(refmodel=truemodel)
@@ -155,6 +156,7 @@ obj.save_plots(refmodel=truemodel)
 # singlemodels = ModelMatrix.get_singlemodels(models)
 # vs, dep = singlemodels['mean']
 
+#
 # #  ---------------------------------------------- WATCH YOUR INVERSION
 # if you want to use BayWatch, simply type "baywatch ." in the terminal in the
 # folder you saved your baywatch configfile or type the full path instead

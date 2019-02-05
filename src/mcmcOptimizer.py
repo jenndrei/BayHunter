@@ -34,14 +34,14 @@ class MCMC_Optimizer(object):
     Contains multiple chains - parallel computing.
     Check output files/ folder of forward modeling to not cause errors
     """
-    def __init__(self, targets, initparams=dict(), modelpriors=dict(),
+    def __init__(self, targets, initparams=dict(), priors=dict(),
                  random_seed=None):
         self.sock_addr = 'tcp://*:5556'
         self.rstate = np.random.RandomState(random_seed)
 
         defaults = utils.get_path('defaults.ini')
         self.priors, self.initparams = utils.load_params(defaults)
-        self.priors.update(modelpriors)
+        self.priors.update(priors)
         self.initparams.update(initparams)
 
         self.station = self.initparams.get('station')

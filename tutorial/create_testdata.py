@@ -22,11 +22,12 @@ sw_x = np.linspace(1, 41, 21)
 swdata = SynthObs.return_swddata(h, vs, vpvs=1.73, x=sw_x)
 SynthObs.save_data(swdata, outfile=datafile)
 
-for slowness in [5.2, 7.0, 8.5]:
-    datafile = op.join(path, 'st%d_%s_%.2f.dat' % (idx, '%s', slowness))
-    rfdata = SynthObs.return_rfdata(
-        h, vs, vpvs=1.73, pars={'p': slowness}, x=None)
-    SynthObs.save_data(rfdata, outfile=datafile)
+# receiver functions
+pars={'p': 6.4}
+datafile = op.join(path, 'st%d_%s.dat' % (idx, '%s'))
+rfdata = SynthObs.return_rfdata(h, vs, vpvs=1.73, x=None)
+SynthObs.save_data(rfdata, outfile=datafile)
 
+# velocity-depth model
 modfile = op.join(path, 'st%d_mod.dat' % idx)
 SynthObs.save_model(h, vs, vpvs=1.73, outfile=modfile)
