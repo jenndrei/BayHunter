@@ -1,10 +1,10 @@
-# Quick start
+BayHunter is a Python tool to perform an McMC transdimensional Bayesian inversion of receiver functions (RF) and surface wave dispersion (SWD), i.e. inverting for the velocity-depth structure, the number of layers and noise parameters (noise correlation and amplitude). Forward modeling codes are provided within this package (RF: rfmini, SWD: quick routine based on surf96), but are easily replacable with own codes. You can also add (completely different) data sets that you wish to invert for.
 
-BayHunter is a Python tool to perform a McMC transdimensional Bayesian inversion of receiver functions (RF) and surface wave dispersion (SWD), i.e. inverting for the velocity-depth structure, the number of layers and noise parameters (correlation, sigma). Forward modeling codes are provided within this package (RF: rfmini, SWD: quick routine based on surf96), but are easily replacable with own codes. You can also add (completely different) data sets that you wish to invert for.
-
-**How to cite:**
+**Citation:**
 
 ... coming soon
+
+# Quick start
 
 ### Requirements
 * matplotlib
@@ -12,11 +12,15 @@ BayHunter is a Python tool to perform a McMC transdimensional Bayesian inversion
 * pyPdf
 * configobj
 * zmq
-* rfmini, only if inverting for RF (rfmini.tar.gz)
+* rfmini, only if inverting for RF (`rfmini.tar.gz`)
 
 ### Installation (python2 environment)
 
+```sh
+git clone https://github.com/jenndrei/BayHunter.git
+cd BayHunter
 sudo python setup.py install
+```
 
 ### Tutorial
 
@@ -26,7 +30,7 @@ You can also create your own synthetic data set with `create_testdata.py`.
 
 Use the input file `config.ini` for adjusting the inversion parameters.
 
-More background information about how to chose the best parameters, and about BayHunter and BayWatch in general can be found in the file `bayhunter.pdf`.
+More background information about how to chose the best parameters, and about BayHunter and BayWatch in general can be found in the file `docs/bayhunter.pdf`.
 
 ### References
 
@@ -39,14 +43,15 @@ More background information about how to chose the best parameters, and about Ba
 
 **BayHunter is ready to use**. It is quick and efficient and I am happy with the performance. Still, there are always things that can be improved to make it even faster and more efficient, and user friendlier.  
 
-BayHunter was mostly tested with a joint data set of RF and SWD and depths down to 80 km. Colleagues tested BayHunter using  
-(1) only one SWD with depths down to 200 km (real data)  
-(2) joint SWD down to 30 km including very low surface velocities (real data)  
-(3) RF and an additional user data set (synthetic data).  
+BayHunter was mostly tested with a joint data set of RF and SWD and depths down to 80 km. Colleagues tested BayHunter using:  
+1. only one SWD with depths down to 200 km (real data)  
+2. joint SWD down to 30 km including very low surface velocities (real data)  
+3. RF and an additional user data set (synthetic data).
+
 Thus, we could eliminate some problems. However, each data set and each inversion has its own characteristics. If you observe any unforeseen behavior, please share it with me to wipe out possible problems we haven't considered.
 
 I am happy to share my experience with you and also if you share your thoughts with me. I am looking forward to your feedback. 
 
-# Who am I ?
+# Who am I?
 
 I am Jennifer Dreiling, final sprint PhD candidate at GFZ (German Research Center for Geosciences) in Potsdam, Germany. BayHunter was created by me in the frame of my PhD program. [Contact me](https://www.gfz-potsdam.de/en/staff/jennifer-dreiling/).
