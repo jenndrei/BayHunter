@@ -10,7 +10,7 @@ setup(
     version="1.0",
     author="Jennifer Dreiling",
     author_email="jennifer.dreiling@gfz-potsdam.de",
-    description=("Transdimensional Bayesian Inversion of RF and/or SW."),
+    description=("Transdimensional Bayesian Inversion of RF and/or SWD."),
     install_requires=[],
     url="",
     packages=['BayHunter'],

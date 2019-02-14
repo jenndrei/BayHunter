@@ -500,7 +500,7 @@ def main():
 
     parser.add_argument(
         'folder', type=str,
-        help=', default %(default)s')
+        help='Path to BayWatch configfile, default %(default)s')
     parser.add_argument(
         '--address', default='127.0.0.1', type=str,
         help='Address where BayHunter is running, default %(default)s')
