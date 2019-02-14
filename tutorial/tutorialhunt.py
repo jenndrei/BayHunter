@@ -48,7 +48,7 @@ xrf, _yrf = np.loadtxt('observed/st3_prf.dat', usecols=[0, 1]).T
 # add noise to create observed data
 # order of noise values (correlation, amplitude):
 # noise = [corr1, sigma1, corr2, sigma2] for 2 targets
-noise = [0.0, 0.012, 0.92, 0.005]
+noise = [0.0, 0.012, 0.90, 0.005]
 ysw_err = SynthObs.compute_expnoise(_ysw, corr=noise[0], sigma=noise[1])
 ysw = _ysw + ysw_err
 yrf_err = SynthObs.compute_gaussnoise(_yrf, corr=noise[2], sigma=noise[3])
@@ -107,15 +107,15 @@ targets = Targets.JointTarget(targets=[target1, target2])
 # See docs/bayhunter.pdf for explanation of parameters
 
 priors.update({'mohoest': (38, 4),  # optional, moho estimate (mean, std)
-               'rfnoise_corr': 0.92,
+               'rfnoise_corr': 0.9,
                'swdnoise_corr': 0.
                # 'rfnoise_sigma': np.std(yrf_err),  # fixed to true value
                # 'swdnoise_sigma': np.std(ysw_err),  # fixed to true value
                })
 
 initparams.update({'nchains': 5,
-                   'iter_burnin': (2048 * 4),
-                   'iter_main': (2048 * 2),
+                   'iter_burnin': (2048 * 32),
+                   'iter_main': (2048 * 16),
                    'propdist': (0.025, 0.025, 0.015, 0.005),
                    })
 
@@ -147,7 +147,7 @@ obj = PlotFromStorage(configfile)
 obj.save_final_distribution(maxmodels=100000, dev=0.05)
 # Save a selection of important plots
 obj.save_plots(refmodel=truemodel)
-
+obj.merge_pdfs()
 
 #
 # If you are only interested on the mean posterior velocity model, type:
