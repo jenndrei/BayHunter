@@ -6,7 +6,9 @@ With the BayWatch module you additionally have the possibility to live-stream yo
 
 **Citation:**
 
-... coming soon
+> Dreiling, Jennifer; Tilmann, Frederik (2019): BayHunter - McMC transdimensional Bayesian inversion of receiver functions and surface wave dispersion. V. 1.0. GFZ Data Services.
+
+[http://doi.org/10.5880/GFZ.2.4.2019.001](http://doi.org/10.5880/GFZ.2.4.2019.001)
 
 ## Quick start
 
