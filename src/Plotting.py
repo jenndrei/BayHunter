@@ -78,7 +78,7 @@ class PlotFromStorage(object):
             print 'Outlier chains from file: %d' % self.outliers.size
         else:
             print 'Outlier chains from file: None'
-            self.outliers = []
+            self.outliers = np.zeros(0)
 
     def init_filelists(self):
         filetypes = ['models', 'likes', 'misfits', 'noise']
@@ -185,7 +185,7 @@ class PlotFromStorage(object):
         # a similar amount of models. Therefore, a constant number of models
         # will be considered from each chain (excluding outlier chains), to
         # add up to a collection of maxmodels models.
-        nchains = int(len(self.likefiles[1]) - len(self.outliers))
+        nchains = int(len(self.likefiles[1]) - self.outliers.size)
         maxmodels = int(maxmodels)
         mpc = maxmodels / nchains  # models per chain
 
@@ -662,7 +662,7 @@ class PlotFromStorage(object):
     def plot_posterior_models1d(self, final=True, chainidx=0, depint=1):
         """depint is the depth interpolation used for binning. Default=1km."""
         if final:
-            nchains = self.initparams['nchains'] - len(self.outliers)
+            nchains = self.initparams['nchains'] - self.outliers.size
         else:
             nchains = 1
 
@@ -681,7 +681,7 @@ class PlotFromStorage(object):
     @tryexcept
     def plot_posterior_models2d(self, final=True, chainidx=0, depint=1):
         if final:
-            nchains = self.initparams['nchains'] - len(self.outliers)
+            nchains = self.initparams['nchains'] - self.outliers.size
         else:
             nchains = 1
 
@@ -1007,7 +1007,7 @@ class PlotFromStorage(object):
         # ax.set_xlim(self.priors['vs'])
         ax.set_ylim(self.priors['z'][::-1])
         ax.set_title('Best fit models from %d chains' %
-                     (len(modfiles)-len(self.outliers)))
+                     (len(modfiles)-self.outliers.size))
         ax.grid(color='gray', alpha=0.6, ls=':', lw=0.5)
         # ax.legend(loc=3)
         return fig
@@ -1053,14 +1053,14 @@ class PlotFromStorage(object):
 
         if len(targets.targets) > 1:
             ax[0].set_title('Best data fits from %d chains' %
-                            (len(modfiles)-len(self.outliers)))
+                            (len(modfiles)-self.outliers.size))
             # idx = len(targets.targets) - 1
             han, lab = ax[0].get_legend_handles_labels()
             handles, labels = self._unique_legend(han, lab)
             ax[0].legend().set_visible(False)
         else:
             ax.set_title('Best data fits from %d chains' %
-                         (len(modfiles)-len(self.outliers)))
+                         (len(modfiles)-self.outliers.size))
             han, lab = ax.get_legend_handles_labels()
             handles, labels = self._unique_legend(han, lab)
             ax.legend().set_visible(False)

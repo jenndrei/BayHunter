@@ -48,7 +48,7 @@ class Model(object):
         vp_step = np.concatenate([(v, v) for v in vp])
         vs_step = np.concatenate([(v, v) for v in vs])
 
-        dep_step[-1] = dep_step[-1] * 2.5  # half space
+        dep_step[-1] = np.max([150, dep_step[-1] * 2.5])  # half space
 
         return vp_step, vs_step, dep_step
 

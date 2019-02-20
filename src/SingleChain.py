@@ -479,7 +479,11 @@ exponential law. Explicitly state a noise reference for your user target \
 # run optimization
 
     def iterate(self):
-        modify = self.rstate.choice(self.modifications)
+        if self.iiter < (-self.iter_phase1 + (self.iterations * 0.01)):
+            # only allow vs and z modifications the first 1 % of iterations
+            modify = self.rstate.choice(['vsmod', 'zvmod'] + self.noisemods)
+        else:
+            modify = self.rstate.choice(self.modifications)
 
         if modify in self.modelmods:
             proposalmodel = self._get_modelproposal(modify)

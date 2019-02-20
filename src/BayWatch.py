@@ -278,6 +278,7 @@ class BayWatcher(object):
             # if nan model, the first element is also nan !
             if ~np.isnan(model[0]):
                 vp, vs, dep = Model.get_stepmodel(model, vpvs=self.vpvs)
+                dep_step[-1] = self.priors['z'][-1] * 1.5
 
                 self.vs_step = np.roll(self.vs_step, -1, axis=0)  # rolling up models
                 vs = nantmp[:vs.size] = vs

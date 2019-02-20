@@ -221,8 +221,6 @@ class MCMC_Optimizer(object):
                 continue
 
             if len(worklist) == 0:
-                logger.info('> All chains sent out after: %.5f s'
-                            % (time.time() - t0))
                 break
 
             chainidx = worklist.pop()
@@ -250,8 +248,15 @@ class MCMC_Optimizer(object):
 
         logger.info('> All chains terminated after: %.5f s' % (time.time() - t0))
 
-        self.chains = list(self.chainlist)
-        self.chains.sort(key=idxsort)
+        try:
+            # only necessary, if want to access chain data after an inversion,
+            # i.e. all models can be accessed in the python terminal, e.g.
+            # for testing purposes. This does not work, if too much memory
+            # is already occupied.
+            self.chains = list(self.chainlist)
+            self.chains.sort(key=idxsort)
+        except:
+            pass
 
         runtime = (time.time() - t0)
         logger.info('### time for inversion: %.2f s' % runtime)
