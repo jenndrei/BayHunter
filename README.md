@@ -1,8 +1,8 @@
 # BayHunter
 
-BayHunter is a Python tool to perform an McMC transdimensional Bayesian inversion of receiver functions (RF) and surface wave dispersion (SWD). It is inverting for the velocity-depth structure, the number of layers and noise parameters (noise correlation and amplitude). The forward modeling codes are provided within the package, but are easily replacable with own codes. You can also add (completely different) data sets that you wish to invert for.
+BayHunter is an open source Python tool to perform an McMC transdimensional Bayesian inversion of receiver functions and/ or surface wave dispersion. It is inverting for the velocity-depth structure, the number of layers and noise parameters (noise correlation and amplitude). The forward modeling codes are provided within the package, but are easily replaceable with own codes. It is also possible to add (completely different) data sets.
 
-With the BayWatch module you additionally have the possibility to live-stream your inversion while it is running: see for yourself how each chain is exploring the parameter space, how the data fits and models do change and in which direction the inversion progresses.
+The BayWatch module can be used to live-stream the inversion while it is running: this makes it easy to see how each chain is exploring the parameter space, how the data fits and models change and in which direction the inversion progresses.
 
 **Citation:**
 
