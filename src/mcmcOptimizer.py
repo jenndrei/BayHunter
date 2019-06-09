@@ -63,7 +63,7 @@ class MCMC_Optimizer(object):
         self.iterations = self.iter_phase1 + self.iter_phase2
 
         self.maxlayers = int(self.priors['layers'][1]) + 1
-        self.vpvs = self.priors['vpvs']
+        # self.vpvs = self.priors['vpvs']
 
         # shared data and chains
         self._init_shareddata()
@@ -118,6 +118,13 @@ class MCMC_Optimizer(object):
         noisedata.fill(np.nan)
         memory += noisedata.nbytes
 
+        # vpvs
+        self.sharedvpvs = sharedctypes.RawArray(
+            'f', self.nchains * self.nmodels)
+        vpvsdata = np.frombuffer(self.sharedvpvs, dtype=dtype)
+        vpvsdata.fill(np.nan)
+        memory += vpvsdata.nbytes
+
         memory = np.ceil(memory / 1e6)
         logger.info('... they occupy ~%d MB memory.' % memory)
 
@@ -126,7 +133,7 @@ class MCMC_Optimizer(object):
             targets=targets, chainidx=chainidx, modelpriors=self.priors,
             initparams=self.initparams, sharedmodels=self.sharedmodels,
             sharedmisfits=self.sharedmisfits, sharedlikes=self.sharedlikes,
-            sharednoise=self.sharednoise,
+            sharednoise=self.sharednoise, sharedvpvs=self.sharedvpvs,
             random_seed=self.rstate.randint(1000))
 
         return chain
@@ -147,6 +154,8 @@ class MCMC_Optimizer(object):
             .reshape((self.nchains, self.nmodels))
         noise = np.frombuffer(self.sharednoise, dtype=dtype) \
             .reshape((self.nchains, self.nmodels, self.ntargets*2))
+        vpvs = np.frombuffer(self.sharedvpvs, dtype=dtype) \
+            .reshape((self.nchains, self.nmodels))
 
         def get_latest_row(models):
             nan_mask = ~np.isnan(models[:, :, 0])
@@ -169,12 +178,24 @@ class MCMC_Optimizer(object):
                             for ic in range(self.nchains)]
             return np.vstack(latest_noise)
 
+        def get_latest_vpvs(vpvs):
+            nan_mask = ~np.isnan(vpvs[:, :])
+            vpvs_mask = np.argmax(np.cumsum(nan_mask, axis=1), axis=1)
+            latest_vpvs = [vpvs[ic, vpvs_mask[ic]]
+                           for ic in range(self.nchains)]
+            return np.vstack(latest_vpvs)
+
         while True:
             logger.debug('Sending array...')
             latest_models = get_latest_row(models)
             latest_likes = get_latest_likes(likes)
             latest_noise = get_latest_noise(noise)
-            self.socket.send_array(latest_models)
+            latest_vpvs = get_latest_vpvs(vpvs)
+
+            latest_vpvs_models = \
+                np.concatenate((latest_vpvs, latest_models), axis=1)
+
+            self.socket.send_array(latest_vpvs_models)
             self.socket.send_array(latest_likes)
             self.socket.send_array(latest_noise)
             time.sleep(dtsend)

@@ -58,9 +58,12 @@ class PlotFromStorage(object):
         self.init_filelists()
         self.init_outlierlist()
 
+        self.mantle = self.priors.get('mantle', None)
+
         self.refmodel = {'model': None,
                          'nlays': None,
-                         'noise': None}
+                         'noise': None,
+                         'vpvs': None}
 
     def read_config(self, configfile):
         return utils.read_config(configfile)
@@ -81,7 +84,7 @@ class PlotFromStorage(object):
             self.outliers = np.zeros(0)
 
     def init_filelists(self):
-        filetypes = ['models', 'likes', 'misfits', 'noise']
+        filetypes = ['models', 'likes', 'misfits', 'noise', 'vpvs']
         filepattern = op.join(self.datapath, 'c???_p%d%s.npy')
         files = []
         size = []
@@ -93,8 +96,8 @@ class PlotFromStorage(object):
             size.append(len(p1files) + len(p2files))
 
         if len(set(size)) == 1:
-            self.modfiles, self.likefiles, self.misfiles, self.noisefiles = \
-                files
+            self.modfiles, self.likefiles, self.misfiles, self.noisefiles, \
+                self.vpvsfiles = files
         else:
             logger.info('You are missing files. Please check ' +
                         '"%s" for completeness.' % self.datapath)
@@ -165,11 +168,11 @@ class PlotFromStorage(object):
         while all models are evenly thinned.
         """
 
-        def save_finalmodels(models, likes, misfits, noise):
+        def save_finalmodels(models, likes, misfits, noise, vpvs):
             """Save chainmodels as pkl file"""
-            names = ['models', 'likes', 'misfits', 'noise']
+            names = ['models', 'likes', 'misfits', 'noise', 'vpvs']
             print '> Saving posterior distribution.'
-            for i, data in enumerate([models, likes, misfits, noise]):
+            for i, data in enumerate([models, likes, misfits, noise, vpvs]):
                 outfile = op.join(self.datapath, 'c_%s' % names[i])
                 np.save(outfile, data)
                 print outfile
@@ -194,6 +197,7 @@ class PlotFromStorage(object):
         allmodels = None
         alllikes = np.ones(maxmodels) * np.nan
         allnoise = np.ones((maxmodels, self.ntargets*2)) * np.nan
+        allvpvs = np.ones(maxmodels) * np.nan
 
         start = 0
         chainidxs, nmodels = self._get_chaininfo()
@@ -208,8 +212,8 @@ class PlotFromStorage(object):
                 index.sort()
 
             chainfiles = [self.modfiles[1][i], self.misfiles[1][i],
-                          self.likefiles[1][i], self.noisefiles[1][i]
-                          ]
+                          self.likefiles[1][i], self.noisefiles[1][i],
+                          self.vpvsfiles[1][i]]
 
             for c, chainfile in enumerate(chainfiles):
                 _, _, ftype = self._return_c_p_t(chainfile)
@@ -236,15 +240,21 @@ class PlotFromStorage(object):
                 elif ftype == 'noise':
                     allnoise[start:end, :] = data
 
+                elif ftype == 'vpvs':
+                    allvpvs[start:end] = data
+
             start = end
 
         # exclude nans
         allmodels = allmodels[~np.isnan(alllikes)]
         allmisfits = allmisfits[~np.isnan(alllikes)]
         allnoise = allnoise[~np.isnan(alllikes)]
+        allvpvs = allvpvs[~np.isnan(alllikes)]
         alllikes = alllikes[~np.isnan(alllikes)]
 
-        save_finalmodels(allmodels, alllikes, allmisfits, allnoise)
+        save_finalmodels(allmodels, alllikes, allmisfits, allnoise, allvpvs)
+
+        self.vpvs = np.median(self._get_posterior_data(['vpvs'], final=1))
 
     def _unique_legend(self, handles, labels):
         # if a key is double, the last handle in the row is returned to the key
@@ -291,6 +301,10 @@ class PlotFromStorage(object):
                 for i in range(len(noise)):
                     fig.axes[i].axvline(
                         noise[i], color='red', lw=0.5, alpha=0.7)
+
+            if mtype == 'vpvs':
+                vpvs = self.refmodel[mtype]
+                fig.axes[0].axvline(vpvs, color='red', lw=0.5, alpha=0.7)
         return fig
 
 # Plot values per iteration.
@@ -398,6 +412,16 @@ class PlotFromStorage(object):
         ax = self._plot_iitervalues(files, ax, layer=True)
         ax.set_ylabel('Number of layers')
         return fig
+
+    @tryexcept
+    def plot_iitervpvs(self, nchains=6):
+        files = self.vpvsfiles[0][:nchains] + self.vpvsfiles[1][:nchains]
+
+        fig, ax = plt.subplots(figsize=(7, 4))
+        ax = self._plot_iitervalues(files, ax)
+        ax.set_ylabel('Vp / Vs')
+        return fig
+
 
 
 # Posterior distributions as 1D histograms for noise and misfits.
@@ -513,7 +537,7 @@ class PlotFromStorage(object):
         likes, = self._get_posterior_data(['likes'], final, chainidx)
         nbin = 20
 
-        fig, ax = plt.subplots(figsize=(4, 3.5))
+        fig, ax = plt.subplots(figsize=(3.5, 3))
 
         count, bins, _ = ax.hist(likes, bins=nbin, color='darkblue', alpha=0.7,
                                  edgecolor='white', linewidth=0.4)
@@ -614,7 +638,38 @@ class PlotFromStorage(object):
         ax.axvline(xmedian, color='black', ls=':', alpha=1)
         ax.set_yticks([])
 
-        ax.set_title('Layer number posterior distribution')
+        ax.set_title('Number of layers')
+        return fig
+
+    @tryexcept
+    def plot_posterior_vpvs(self, final=True, chainidx=0):
+
+        vpvs, = self._get_posterior_data(['vpvs'], final, chainidx)
+        nbin = 20
+
+        fig, ax = plt.subplots(figsize=(3.5, 3))
+
+        count, bins, _ = ax.hist(vpvs, bins=nbin, color='darkblue', alpha=0.7,
+                                 edgecolor='white', linewidth=0.4)
+        cbins = (bins[:-1] + bins[1:]) / 2.
+        xmax = cbins[np.argmax(count)]
+        xmedian = np.median(vpvs)
+
+        stats = 'mode: %.4f\nmed: %.4f' % (xmax, xmedian)
+        stats = 'median: %.4f' % xmedian
+
+        ax.text(0.97, 0.97, '%s' % stats,
+                fontsize=9, color='k',
+                horizontalalignment='right',
+                verticalalignment='top',
+                transform=ax.transAxes)
+
+        ax.axvline(xmedian, color='k', ls=':', alpha=0.9)
+
+        ax.set_yticks([])
+        xticks = np.array(ax.get_xticks())
+        ax.set_xticklabels(xticks, fontsize=8)
+        ax.set_title('Vp / Vs')
         return fig
 
     @tryexcept
@@ -734,7 +789,7 @@ class PlotFromStorage(object):
         vsjumps = np.zeros(len(models)) * np.nan
 
         for i, model in enumerate(models):
-            vp, vs, h = Model.get_vp_vs_h(model, self.priors['vpvs'])
+            vp, vs, h = Model.get_vp_vs_h(model, self.vpvs, self.mantle)
             # cvp, cvs, cdepth = Model.get_stepmodel_from_h(h=h, vs=vs, vp=vp)
             # ifaces, vs = cdepth[1::2], cvs[::2]   # interfaces, vs
             ifaces = np.cumsum(h)
@@ -889,7 +944,7 @@ class PlotFromStorage(object):
             currentmodel = models[-1]
 
             color = color_list[i]
-            vp, vs, h = Model.get_vp_vs_h(currentmodel, self.priors['vpvs'])
+            vp, vs, h = Model.get_vp_vs_h(currentmodel, self.vpvs, self.mantle)
             cvp, cvs, cdepth = Model.get_stepmodel_from_h(h=h, vs=vs, vp=vp)
 
             label = 'c%d / %d' % (chainidx, vs.size-1)
@@ -922,7 +977,7 @@ class PlotFromStorage(object):
             models = np.load(modfile)
             currentmodel = models[-1]
 
-            vp, vs, h = Model.get_vp_vs_h(currentmodel, self.priors['vpvs'])
+            vp, vs, h = Model.get_vp_vs_h(currentmodel, self.vpvs, self.mantle)
             rho = vp * 0.32 + 0.77
 
             jmisfit = 0
@@ -990,13 +1045,13 @@ class PlotFromStorage(object):
                 thebestmodel = bestmodel
                 thebestchain = chainidx
 
-            vp, vs, h = Model.get_vp_vs_h(bestmodel, self.priors['vpvs'])
+            vp, vs, h = Model.get_vp_vs_h(bestmodel, self.vpvs, self.mantle)
             cvp, cvs, cdepth = Model.get_stepmodel_from_h(h=h, vs=vs, vp=vp)
 
             ax.plot(cvs, cdepth, color='k', ls='-', lw=0.8, alpha=0.5)
 
         # label = 'c%d' % thebestchain
-        # vp, vs, h = Model.get_vp_vs_h(thebestmodel, self.priors['vpvs'])
+        # vp, vs, h = Model.get_vp_vs_h(thebestmodel, self.vpvs, self.mantle)
         # cvp, cvs, cdepth = Model.get_stepmodel_from_h(h=h, vs=vs, vp=vp)
         # ax.plot(cvs, cdepth, color='red', ls='-', lw=1,
         #         alpha=0.8, label=label)
@@ -1039,7 +1094,7 @@ class PlotFromStorage(object):
                 thebestmodel = bestmodel
                 thebestchain = chainidx
 
-            vp, vs, h = Model.get_vp_vs_h(bestmodel, self.priors['vpvs'])
+            vp, vs, h = Model.get_vp_vs_h(bestmodel, self.vpvs, self.mantle)
             rho = vp * 0.32 + 0.77
 
             for n, target in enumerate(targets.targets):
@@ -1083,7 +1138,7 @@ class PlotFromStorage(object):
 
         target = self.targets[ind]
         x, y = target.obsdata.x, target.obsdata.y
-        vp, vs, h = Model.get_vp_vs_h(model, self.priors['vpvs'])
+        vp, vs, h = Model.get_vp_vs_h(model, self.vpvs, self.mantle)
         rho = vp * 0.32 + 0.77
 
         _, ymod = target.moddata.plugin.run_model(
@@ -1140,6 +1195,10 @@ class PlotFromStorage(object):
         - depint is the interpolation only for histogram plotting.
         Default is 1 km. A finer interpolation increases the plotting time.
         """
+
+        self.vpvs = np.median(self._get_posterior_data(['vpvs'], final=1))
+        print 'Vp/Vs from current data: %.3f' % self.vpvs
+
         self.refmodel.update(refmodel)
         # plot chain specific posterior distributions
 
@@ -1177,6 +1236,10 @@ class PlotFromStorage(object):
         - depint is the interpolation only for histogram plotting.
         Default is 1 km. A finer interpolation increases the plotting time.
         """
+
+        self.vpvs = np.median(self._get_posterior_data(['vpvs'], final=1))
+        print 'Vp/Vs from current data: %.3f' % self.vpvs
+
         self.refmodel.update(refmodel)
 
         nchains = np.min([nchains, len(self.likefiles[1])])
@@ -1190,6 +1253,9 @@ class PlotFromStorage(object):
 
         fig1c = self.plot_iiternlayers(nchains=nchains)
         self.savefig(fig1c, 'c_iiter_nlayers.pdf')
+
+        fig1d = self.plot_iitervpvs(nchains=nchains)
+        self.savefig(fig1d, 'c_iiter_vpvs.pdf')
 
         for i in range(self.ntargets):
             ind = i * 2 + 1
@@ -1208,6 +1274,10 @@ class PlotFromStorage(object):
         fig2b = self.plot_posterior_nlayers()
         self.plot_refmodel(fig2b, 'nlays')
         self.savefig(fig2b, 'c_posterior_nlayers.pdf')
+
+        fig2b = self.plot_posterior_vpvs()
+        self.plot_refmodel(fig2b, 'vpvs')
+        self.savefig(fig2b, 'c_posterior_vpvs.pdf')
 
         fig2c = self.plot_posterior_noise()
         self.plot_refmodel(fig2c, 'noise')
