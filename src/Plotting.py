@@ -254,8 +254,6 @@ class PlotFromStorage(object):
 
         save_finalmodels(allmodels, alllikes, allmisfits, allnoise, allvpvs)
 
-        self.vpvs = np.median(self._get_posterior_data(['vpvs'], final=1))
-
     def _unique_legend(self, handles, labels):
         # if a key is double, the last handle in the row is returned to the key
         legend = OrderedDict(zip(labels, handles))
@@ -776,7 +774,7 @@ class PlotFromStorage(object):
 
     @tryexcept
     def plot_moho_crustvel_tradeoff(self, moho=None, mohovs=None, refmodel=None):
-        models, = self._get_posterior_data(['models'], final=True)
+        models, vpvs = self._get_posterior_data(['models', 'vpvs'], final=True)
 
         if moho is None:
             moho = self.priors['z']
@@ -789,7 +787,8 @@ class PlotFromStorage(object):
         vsjumps = np.zeros(len(models)) * np.nan
 
         for i, model in enumerate(models):
-            vp, vs, h = Model.get_vp_vs_h(model, self.vpvs, self.mantle)
+            thisvpvs = vpvs[i]
+            vp, vs, h = Model.get_vp_vs_h(model, thisvpvs, self.mantle)
             # cvp, cvs, cdepth = Model.get_stepmodel_from_h(h=h, vs=vs, vp=vp)
             # ifaces, vs = cdepth[1::2], cvs[::2]   # interfaces, vs
             ifaces = np.cumsum(h)
@@ -941,10 +940,12 @@ class PlotFromStorage(object):
         for i, modfile in enumerate(self.modfiles[1][:nchains]):
             chainidx, _, _ = self._return_c_p_t(modfile)
             models = np.load(modfile)
+            vpvs = np.load(modfile.replace('models', 'vpvs')).T
+            currentvpvs = vpvs[-1]
             currentmodel = models[-1]
 
             color = color_list[i]
-            vp, vs, h = Model.get_vp_vs_h(currentmodel, self.vpvs, self.mantle)
+            vp, vs, h = Model.get_vp_vs_h(currentmodel, currentvpvs, self.mantle)
             cvp, cvs, cdepth = Model.get_stepmodel_from_h(h=h, vs=vs, vp=vp)
 
             label = 'c%d / %d' % (chainidx, vs.size-1)
@@ -975,9 +976,11 @@ class PlotFromStorage(object):
             color = color_list[i]
             chainidx, _, _ = self._return_c_p_t(modfile)
             models = np.load(modfile)
+            vpvs = np.load(modfile.replace('models', 'vpvs')).T
+            currentvpvs = vpvs[-1]
             currentmodel = models[-1]
 
-            vp, vs, h = Model.get_vp_vs_h(currentmodel, self.vpvs, self.mantle)
+            vp, vs, h = Model.get_vp_vs_h(currentmodel, currentvpvs, self.mantle)
             rho = vp * 0.32 + 0.77
 
             jmisfit = 0
@@ -1036,22 +1039,25 @@ class PlotFromStorage(object):
             if chainidx in self.outliers:
                 continue
             models = np.load(modfile)
+            vpvs = np.load(modfile.replace('models', 'vpvs')).T
             misfits = np.load(modfile.replace('models', 'misfits')).T[-1]
             bestmodel = models[np.argmin(misfits)]
+            bestvpvs = vpvs[np.argmin(misfits)]
             bestmisfit = misfits[np.argmin(misfits)]
 
             if bestmisfit < thebestmisfit:
                 thebestmisfit = bestmisfit
                 thebestmodel = bestmodel
+                thebestvpvs = bestvpvs
                 thebestchain = chainidx
 
-            vp, vs, h = Model.get_vp_vs_h(bestmodel, self.vpvs, self.mantle)
+            vp, vs, h = Model.get_vp_vs_h(bestmodel, bestvpvs, self.mantle)
             cvp, cvs, cdepth = Model.get_stepmodel_from_h(h=h, vs=vs, vp=vp)
 
             ax.plot(cvs, cdepth, color='k', ls='-', lw=0.8, alpha=0.5)
 
         # label = 'c%d' % thebestchain
-        # vp, vs, h = Model.get_vp_vs_h(thebestmodel, self.vpvs, self.mantle)
+        # vp, vs, h = Model.get_vp_vs_h(thebestmodel, thebestvpvs, self.mantle)
         # cvp, cvs, cdepth = Model.get_stepmodel_from_h(h=h, vs=vs, vp=vp)
         # ax.plot(cvs, cdepth, color='red', ls='-', lw=1,
         #         alpha=0.8, label=label)
@@ -1085,16 +1091,19 @@ class PlotFromStorage(object):
             if chainidx in self.outliers:
                 continue
             models = np.load(modfile)
+            vpvs = np.load(modfile.replace('models', 'vpvs')).T
             misfits = np.load(modfile.replace('models', 'misfits')).T[-1]
             bestmodel = models[np.argmin(misfits)]
+            bestvpvs = vpvs[np.argmin(misfits)]
             bestmisfit = misfits[np.argmin(misfits)]
 
             if bestmisfit < thebestmisfit:
                 thebestmisfit = bestmisfit
                 thebestmodel = bestmodel
+                thebestvpvs = bestvpvs
                 thebestchain = chainidx
 
-            vp, vs, h = Model.get_vp_vs_h(bestmodel, self.vpvs, self.mantle)
+            vp, vs, h = Model.get_vp_vs_h(bestmodel, bestvpvs, self.mantle)
             rho = vp * 0.32 + 0.77
 
             for n, target in enumerate(targets.targets):
@@ -1128,17 +1137,18 @@ class PlotFromStorage(object):
     def plot_rfcorr(self, rf='prf'):
         from BayHunter import SynthObs
 
-        p2models, p2noise, p2misfits = self._get_posterior_data(
-            ['models', 'noise', 'misfits'], final=True)
+        p2models, p2noise, p2misfits, p2vpvs = self._get_posterior_data(
+            ['models', 'noise', 'misfits', 'vpvs'], final=True)
 
         fig, axes = plt.subplots(2, sharex=True, sharey=True)
         ind = self.refs.index(rf)
         best = np.argmin(p2misfits.T[ind])
         model = p2models[best]
+        vpvs = p2vpvs[best]
 
         target = self.targets[ind]
         x, y = target.obsdata.x, target.obsdata.y
-        vp, vs, h = Model.get_vp_vs_h(model, self.vpvs, self.mantle)
+        vp, vs, h = Model.get_vp_vs_h(model, vpvs, self.mantle)
         rho = vp * 0.32 + 0.77
 
         _, ymod = target.moddata.plugin.run_model(
@@ -1195,10 +1205,6 @@ class PlotFromStorage(object):
         - depint is the interpolation only for histogram plotting.
         Default is 1 km. A finer interpolation increases the plotting time.
         """
-
-        self.vpvs = np.median(self._get_posterior_data(['vpvs'], final=1))
-        print 'Vp/Vs from current data: %.3f' % self.vpvs
-
         self.refmodel.update(refmodel)
         # plot chain specific posterior distributions
 
@@ -1236,10 +1242,6 @@ class PlotFromStorage(object):
         - depint is the interpolation only for histogram plotting.
         Default is 1 km. A finer interpolation increases the plotting time.
         """
-
-        self.vpvs = np.median(self._get_posterior_data(['vpvs'], final=1))
-        print 'Vp/Vs from current data: %.3f' % self.vpvs
-
         self.refmodel.update(refmodel)
 
         nchains = np.min([nchains, len(self.likefiles[1])])
