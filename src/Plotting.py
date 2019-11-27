@@ -18,6 +18,7 @@ from collections import OrderedDict
 from BayHunter import utils
 from BayHunter import Targets
 from BayHunter import Model, ModelMatrix
+import matplotlib.colors as colors
 
 # logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -320,7 +321,8 @@ class PlotFromStorage(object):
         for i, file in enumerate(files):
             phase = int(op.basename(file).split('_p')[1][0])
             alpha = (0.4 if phase is 1 else 0.7)
-            ls = ('--' if phase is 1 else '-')
+            ls = ('-' if phase is 1 else '-')
+            lw = (0.5 if phase is 1 else 0.8)
             chainidx, _, _ = self._return_c_p_t(file)
             color = color_list[n]
 
@@ -335,7 +337,7 @@ class PlotFromStorage(object):
             label = 'c%d' % (chainidx)
 
             ax.plot(iters, data, color=color,
-                    ls=ls, lw=0.8, alpha=alpha,
+                    ls=ls, lw=lw, alpha=alpha,
                     label=label if phase is 2 else '')
 
             if phase == 2:
@@ -353,7 +355,7 @@ class PlotFromStorage(object):
 
         (abs(xmin) + xmax)
         center = np.array([abs(xmin/2.), abs(xmin) + xmax/2.]) / (abs(xmin) + xmax)
-        for i, text in enumerate(['burnin', 'main']):
+        for i, text in enumerate(['Burn-in phase', 'Exploration phase']):
             ax.text(center[i], 0.97, text,
                     fontsize=12, color='k',
                     horizontalalignment='center',
@@ -374,12 +376,12 @@ class PlotFromStorage(object):
         return fig
 
     @tryexcept
-    def plot_iiterlikelihood(self, nchains=6):
+    def plot_iiterlikes(self, nchains=6):
         files = self.likefiles[0][:nchains] + self.likefiles[1][:nchains]
 
         fig, ax = plt.subplots(figsize=(7, 4))
         ax = self._plot_iitervalues(files, ax)
-        ax.set_ylabel('Joint likelihood')
+        ax.set_ylabel('Likelihood')
         return fig
 
     @tryexcept
@@ -398,7 +400,7 @@ class PlotFromStorage(object):
         ax = self._plot_iitervalues(files, ax, noise=True, ind=ind)
 
         parameter = np.concatenate(
-            [[ref+'_corr', ref+'_sigma'] for ref in self.refs[:-1]])
+            [['correlation (%s)' % ref, '$\sigma$ (%s)' % ref] for ref in self.refs[:-1]])
         ax.set_ylabel(parameter[ind])
         return fig
 
@@ -419,7 +421,6 @@ class PlotFromStorage(object):
         ax = self._plot_iitervalues(files, ax)
         ax.set_ylabel('Vp / Vs')
         return fig
-
 
 
 # Posterior distributions as 1D histograms for noise and misfits.
@@ -445,7 +446,7 @@ class PlotFromStorage(object):
 
         ax.invert_yaxis()
         ax.set_ylabel('Depth in km')
-        ax.set_xlabel('Velocity in km/s')
+        ax.set_xlabel('$V_S$ in km/s')
 
         han, lab = ax.get_legend_handles_labels()
         ax.legend(han[:-1], lab[:-1], loc=3)
@@ -488,14 +489,17 @@ class PlotFromStorage(object):
                                  sharey=True, figsize=(5, 6.5))
         fig.subplots_adjust(wspace=0.05)
         data2d = axes[0].hist2d(vss_flatten, deps_int.flatten(),
-                                bins=(vsbins, depbins), vmax=len(models))
+                                bins=(vsbins, depbins), vmax=len(models),
+                                )
 
         # plot mean / modes
-        colors = ['green', 'white']
-        for c, choice in enumerate(['mean', 'mode']):
+        # colors = ['green', 'white']
+        # for c, choice in enumerate(['mean', 'mode']):
+        colors = ['white']
+        for c, choice in enumerate(['mode']):
             vs, dep = singlemodels[choice]
             color = colors[c]
-            axes[0].plot(vs, dep, color=color, lw=0.9, alpha=0.9, label=choice)
+            axes[0].plot(vs, dep, color=color, lw=1, alpha=0.9, label=choice)
 
         vs_mode, dep_mode = singlemodels['mode']
         axes[0].legend(loc=3)
@@ -508,11 +512,11 @@ class PlotFromStorage(object):
         center_lay = (lay_bin[:-1] + lay_bin[1:]) / 2.
 
         axes[0].set_ylabel('Depth in km')
-        axes[0].set_xlabel('Velocity in km/s')
+        axes[0].set_xlabel('$V_S$ in km/s')
 
         axes[0].invert_yaxis()
 
-        axes[0].set_title('Posterior distribution\n%d models' % len(models))
+        axes[0].set_title('%d models' % len(models))
         axes[1].set_xticks([])
         return fig, axes
 
@@ -530,76 +534,58 @@ class PlotFromStorage(object):
 
         return outarrays
 
+    def _plot_posterior_distribution(self, data, bins, formatter='%.2f', ax=None):
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(3.5, 3))
+
+        count, bins, _ = ax.hist(data, bins=bins, color='darkblue', alpha=0.7,
+                                 edgecolor='white', linewidth=0.4)
+        cbins = (bins[:-1] + bins[1:]) / 2.
+        mode = cbins[np.argmax(count)]
+        median = np.median(data)
+
+        if not formatter is None:
+            text = 'median: %s' % formatter % median
+            ax.text(0.97, 0.97, text,
+                    fontsize=9, color='k',
+                    horizontalalignment='right',
+                    verticalalignment='top',
+                    transform=ax.transAxes)
+
+        ax.axvline(median, color='k', ls=':', lw=1)
+        
+        # xticks = np.array(ax.get_xticks())
+        # ax.set_xticklabels(xticks, fontsize=8)
+        ax.set_yticks([])
+
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        return ax
+
     @tryexcept
     def plot_posterior_likes(self, final=True, chainidx=0):
         likes, = self._get_posterior_data(['likes'], final, chainidx)
-        nbin = 20
+        bins = 20
+        formatter = '%d'
 
-        fig, ax = plt.subplots(figsize=(3.5, 3))
-
-        count, bins, _ = ax.hist(likes, bins=nbin, color='darkblue', alpha=0.7,
-                                 edgecolor='white', linewidth=0.4)
-        cbins = (bins[:-1] + bins[1:]) / 2.
-        xmax = cbins[np.argmax(count)]
-        xmedian = np.median(likes)
-
-        stats = 'mode: %.4f\nmed: %.4f' % (xmax, xmedian)
-        stats = 'median: %.4f' % xmedian
-
-        ax.text(0.97, 0.97, '%s' % stats,
-                fontsize=9, color='k',
-                horizontalalignment='right',
-                verticalalignment='top',
-                transform=ax.transAxes)
-
-        ax.axvline(xmedian, color='k', ls=':', alpha=0.9)
-
-        ax.set_yticks([])
-        xticks = np.array(ax.get_xticks())
-        ax.set_xticklabels(xticks, fontsize=8)
-        ax.set_title('Likelihoods posterior distributions')
-        return fig
+        ax = self._plot_posterior_distribution(likes, bins, formatter)
+        ax.set_xlabel('Likelihood')
+        return ax.figure
 
     @tryexcept
     def plot_posterior_misfits(self, final=True, chainidx=0):
         misfits, = self._get_posterior_data(['misfits'], final, chainidx)
 
         datasets = [misfit for misfit in misfits.T]
-        datasets = datasets[:-1]  # joint misfit
-        nbin = 20
+        datasets = datasets[:-1]  # excluding joint misfit
+        bins = 20
+        formatter = '%.2f'
 
-        fig, axes = plt.subplots(1, len(datasets), figsize=(4*len(datasets), 3.5))
+        fig, axes = plt.subplots(1, len(datasets), figsize=(3.5*len(datasets), 3))
+        for i, data in enumerate(datasets):
+            axes[i] = self._plot_posterior_distribution(data, bins, formatter, ax=axes[i])
+            axes[i].set_xlabel('RMS misfit (%s)' % self.refs[i])
 
-        for i, x in enumerate(datasets):
-            if len(datasets) == 1:
-                ax = axes
-            else:
-                ax = axes[i]
-
-            sort = np.argsort(x)
-            x = x[sort]
-
-            count, bins, _ = ax.hist(x, bins=nbin, color='darkblue', alpha=0.7,
-                                     edgecolor='white', linewidth=0.4)
-            cbins = (bins[:-1] + bins[1:]) / 2.
-            xmax = cbins[np.argmax(count)]
-            xmedian = np.median(x)
-
-            stats = 'mode: %.4f\nmed: %.4f' % (xmax, xmedian)
-            stats = 'median: %.4f' % xmedian
-
-            ax.text(0.97, 0.97, '%s\n%s' % (self.refs[i], stats),
-                    fontsize=9, color='k',
-                    horizontalalignment='right',
-                    verticalalignment='top',
-                    transform=ax.transAxes)
-
-            ax.axvline(xmedian, color='k', ls=':', alpha=0.9)
-
-            ax.set_yticks([])
-            xticks = np.array(ax.get_xticks())
-            ax.set_xticklabels(xticks, fontsize=8)
-        fig.suptitle('RMS misfit posterior distributions')
         return fig
 
     @tryexcept
@@ -608,78 +594,39 @@ class PlotFromStorage(object):
         models, = self._get_posterior_data(['models'], final, chainidx)
 
         # get interfaces
-        # models = ModelMatrix._replace_zvnoi_h(models)
         models = np.array([model[~np.isnan(model)] for model in models])
-
         layers = np.array([(model.size/2 - 1) for model in models])
 
-        fig, ax = plt.subplots(figsize=(3.5, 3))
-        nbins = np.arange(np.min(layers), np.max(layers)+2)-0.5
+        bins = np.arange(np.min(layers), np.max(layers)+2)-0.5
 
-        sort = np.argsort(layers)
-        x = layers[sort]
-        count, bins, _ = ax.hist(x, bins=nbins, color='darkblue', alpha=0.7,
-                                 edgecolor='white', linewidth=0.4)
-        cbins = (bins[:-1] + bins[1:]) / 2.
-        xmax = cbins[np.argmax(count)]
-        xmedian = np.median(x)
+        formatter = '%d'
+        ax = self._plot_posterior_distribution(layers, bins, formatter)
 
-        stats = 'mode: %d\nmed: %d' % (xmax, xmedian)
-        stats = 'median: %d' % xmedian
-
-        ax.text(0.97, 0.97, '%s\n%s' % ('nlayers', stats),
-                fontsize=9, color='k',
-                horizontalalignment='right',
-                verticalalignment='top',
-                transform=ax.transAxes)
-
-        ax.axvline(xmedian, color='black', ls=':', alpha=1)
-        ax.set_yticks([])
-
-        ax.set_title('Number of layers')
-        return fig
+        xticks = np.arange(layers.min(), layers.max()+1)
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(xticks)
+        ax.set_xlabel('Number of layers')
+        return ax.figure
 
     @tryexcept
     def plot_posterior_vpvs(self, final=True, chainidx=0):
-
         vpvs, = self._get_posterior_data(['vpvs'], final, chainidx)
-        nbin = 20
+        bins = 20
+        formatter = '%.2f'
 
-        fig, ax = plt.subplots(figsize=(3.5, 3))
-
-        count, bins, _ = ax.hist(vpvs, bins=nbin, color='darkblue', alpha=0.7,
-                                 edgecolor='white', linewidth=0.4)
-        cbins = (bins[:-1] + bins[1:]) / 2.
-        xmax = cbins[np.argmax(count)]
-        xmedian = np.median(vpvs)
-
-        stats = 'mode: %.4f\nmed: %.4f' % (xmax, xmedian)
-        stats = 'median: %.4f' % xmedian
-
-        ax.text(0.97, 0.97, '%s' % stats,
-                fontsize=9, color='k',
-                horizontalalignment='right',
-                verticalalignment='top',
-                transform=ax.transAxes)
-
-        ax.axvline(xmedian, color='k', ls=':', alpha=0.9)
-
-        ax.set_yticks([])
-        xticks = np.array(ax.get_xticks())
-        ax.set_xticklabels(xticks, fontsize=8)
-        ax.set_title('Vp / Vs')
-        return fig
+        ax = self._plot_posterior_distribution(vpvs, bins, formatter)
+        ax.set_xlabel('$V_P$ / $V_S$')
+        return ax.figure
 
     @tryexcept
     def plot_posterior_noise(self, final=True, chainidx=0):
-
         noise, = self._get_posterior_data(['noise'], final, chainidx)
-
-        title = np.concatenate([[ref+'_corr', ref+'_sigma']
+        label = np.concatenate([['correlation (%s)' % ref, '$\sigma$ (%s)' % ref]
                                for ref in self.refs[:-1]])
-
+        
         pars = len(noise.T)/2
-        fig, axes = plt.subplots(pars, 2, figsize=(7, 2*pars))
+        fig, axes = plt.subplots(pars, 2, figsize=(7, 3*pars))
+        fig.subplots_adjust(hspace=0.2)
 
         for i, data in enumerate(noise.T):
             if self.ntargets > 1:
@@ -687,29 +634,65 @@ class PlotFromStorage(object):
             else:
                 ax = axes[i % 2]
 
-            sort = np.argsort(data)
-            data = data[sort]
-
-            count, bins, _ = ax.hist(data, bins=20, color='darkblue', alpha=0.7,
-                                     edgecolor='white', linewidth=0.4)
-            cbins = (bins[:-1] + bins[1:]) / 2.
-            xmax = cbins[np.argmax(count)]
-            xmedian = np.median(data)
-
-            stats = 'mode: %.4f\nmed: %.4f' % (xmax, xmedian)
-            stats = 'median: %.4f' % xmedian
-
-            ax.text(0.97, 0.97, '%s\n%s' % (title[i], stats),
-                    fontsize=9, color='k',
-                    horizontalalignment='right',
-                    verticalalignment='top',
-                    transform=ax.transAxes)
-
-            ax.axvline(xmedian, color='black', ls=':', alpha=1)
-
-            ax.set_yticks([])
-        fig.suptitle('Noise parameter posterior distributions')
+            if np.std(data) == 0:  # constant during inversion
+                m = np.mean(data)
+                bins = [m-1, m-0.1, m+0.1, m+1]
+                formatter = None
+                ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)
+                ax.text(0.5, 0.5, 'constant: %.2f' % m, horizontalalignment='center',
+                        verticalalignment='center', transform = ax.transAxes,
+                        fontsize=12)
+                ax.set_xticks([])
+            else:
+                bins = 20
+                formatter = '%.4f'
+                ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)    
+            ax.set_xlabel(label[i])
         return fig
+    
+    @tryexcept
+    def plot_posterior_others(self, final=True, chainidx=0):
+        likes, = self._get_posterior_data(['likes'], final, chainidx)
+        
+        misfits, = self._get_posterior_data(['misfits'], final, chainidx)
+        misfits = misfits.T[-1] # only joint misfit
+        vpvs, = self._get_posterior_data(['vpvs'], final, chainidx)
+        
+        models, = self._get_posterior_data(['models'], final, chainidx)
+        models = np.array([model[~np.isnan(model)] for model in models])
+        layers = np.array([(model.size/2 - 1) for model in models])
+        nbins = np.arange(np.min(layers), np.max(layers)+2)-0.5
+
+        formatters = ['%d', '%.2f', '%.2f', '%d']
+        nbins = [20, 20, 20, nbins]
+        labels = ['Likelihood', 'Joint misfit', '$V_P$ / $V_S$', 'Number of layers']
+
+        fig, axes = plt.subplots(2, 2, figsize=(7, 6))
+        axes = axes.flatten()
+        for i, data in enumerate([likes, misfits, vpvs, layers]):
+            ax = axes[i]
+
+            if i==2 and np.std(data) == 0: # constant vpvs
+                m = np.mean(data)
+                bins = [m-1, m-0.1, m+0.1, m+1]
+                formatter = None
+                ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)
+                ax.text(0.5, 0.5, 'constant: %.2f' % m, horizontalalignment='center',
+                        verticalalignment='center', transform = ax.transAxes,
+                        fontsize=12)
+                ax.set_xticks([])
+            else:
+                formatter = formatters[i]
+                bins = nbins[i]
+                ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)    
+
+                if i == 3:
+                    xticks = np.arange(layers.min(), layers.max()+1)
+                    ax.set_xticks(xticks)
+                    ax.set_xticklabels(xticks)
+
+            ax.set_xlabel(labels[i])
+        return ax.figure
 
     @tryexcept
     def plot_posterior_models1d(self, final=True, chainidx=0, depint=1):
@@ -727,8 +710,7 @@ class PlotFromStorage(object):
         # ax.set_xlim(self.priors['vs'])
         ax.set_ylim(self.priors['z'][::-1])
         ax.grid(color='gray', alpha=0.6, ls=':', lw=0.5)
-        ax.set_title('Posterior distribution\n%d models from %d chains'
-                     % (len(models), nchains))
+        ax.set_title('%d models from %d chains' % (len(models), nchains))
         return fig
 
     @tryexcept
@@ -746,29 +728,9 @@ class PlotFromStorage(object):
         fig, axes = self._plot_bestmodels_hist(models, dep_int)
         # axes[0].set_xlim(self.priors['vs'])
         axes[0].set_ylim(self.priors['z'][::-1])
-        axes[0].set_title('Posterior distribution\n%d models from %d chains'
-                          % (len(models), nchains))
+        axes[0].set_title('%d models from %d chains' % (len(models), nchains))
         return fig
 
-    @tryexcept
-    def plot_likeconvergence(self, ind=-1):
-
-        smax = 0  # sigma max, should be regressed curved values
-
-        fig, ax = plt.subplots()
-        for i in range(len(self.noisefiles[1])):  # p2 phase
-            noise = np.load(self.noisefiles[1][i]).T[ind]
-            likes = np.load(self.likefiles[1][i])
-            ax.plot(noise, likes, ls='', marker='o', ms=2, color='k',
-                    alpha=0.6)
-            smax = np.max([smax, likes.max()])
-            if smax == likes.max():
-                sigma = noise[np.argmax(likes)]
-
-        ax.set_xlim([sigma*0.75, sigma*1.35])
-        ax.set_ylim([smax*0.95, smax*1.05])
-
-        return fig
 
 # Plot moho depth - crustal vs tradeoff
 
@@ -830,7 +792,7 @@ class PlotFromStorage(object):
         fig.subplots_adjust(hspace=0.05)
         fig.subplots_adjust(wspace=0.05)
 
-        labels = ['Vs last crustal layer', 'Vs crustal mean', 'Vs increase']
+        labels = ['$V_S$ last crustal layer', '$V_S$ crustal mean', '$V_S$ increase']
         bins = 50
 
         for n, xdata in enumerate([vslastlayer, vscrust, vsjumps]):
@@ -953,7 +915,7 @@ class PlotFromStorage(object):
                     alpha=0.7, label=label)
 
         ax.invert_yaxis()
-        ax.set_xlabel('Velocity in km/s')
+        ax.set_xlabel('$V_S$ in km/s')
         ax.set_ylabel('Depth in km')
         # ax.set_xlim(self.priors['vs'])
         ax.set_ylim(self.priors['z'][::-1])
@@ -1063,7 +1025,7 @@ class PlotFromStorage(object):
         #         alpha=0.8, label=label)
 
         ax.invert_yaxis()
-        ax.set_xlabel('Velocity in km/s')
+        ax.set_xlabel('$V_S$ in km/s')
         ax.set_ylabel('Depth in km')
         # ax.set_xlim(self.priors['vs'])
         ax.set_ylim(self.priors['z'][::-1])
@@ -1192,9 +1154,9 @@ class PlotFromStorage(object):
         with open(outputfile, "wb") as f:
             output.write(f)
 
-    def save_chainplots(self, cidx=0, refmodel=dict(), dep_int=None):
+    def save_chainplots(self, cidx=0, refmodel=dict(), depint=None):
         """
-        Truemodel is a dictionary and must contain plottable values:
+        Refmodel is a dictionary and must contain plottable values:
         - 'vs' and 'dep' for the vs-depth plots, will be plotted as given
         - 'rfnoise_corr', 'rfnoise_sigma', 'swdnoise_corr', 'swdnoise_sigma' -
         in this order as noise parameter reference in histogram plots
@@ -1231,10 +1193,11 @@ class PlotFromStorage(object):
 
     def save_plots(self, nchains=5, refmodel=dict(), depint=1):
         """
-        Truemodel is a dictionary and must contain plottable values:
-        - 'vs' and 'dep' for the vs-depth plots, will be plotted as given
-        - 'rfnoise_corr', 'rfnoise_sigma', 'swdnoise_corr', 'swdnoise_sigma' -
-        in this order as noise parameter reference in histogram plots
+        Refmodel is a dictionary and must contain plottable values:
+        - 'vs' and 'dep' (np.arrays) for the vs-depth plots, will be plotted as given
+        - noise parameters, if e.g., inverting for RF and SWD are:
+        'rfnoise_corr', 'rfnoise_sigma', 'swdnoise_corr', 'swdnoise_sigma',
+        (depends on number of targets, but order must be correlation / sigma)
         - 'nlays' number of layers as reference
 
         Only given values will be plotted.
@@ -1247,7 +1210,7 @@ class PlotFromStorage(object):
         nchains = np.min([nchains, len(self.likefiles[1])])
 
         # plot values changing over iteration
-        fig1a = self.plot_iiterlikelihood(nchains=nchains)
+        fig1a = self.plot_iiterlikes(nchains=nchains)
         self.savefig(fig1a, 'c_iiter_likes.pdf')
 
         fig1b = self.plot_iitermisfits(nchains=nchains, ind=-1)

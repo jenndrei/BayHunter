@@ -14,8 +14,10 @@ import numpy as np
 import os.path as op
 
 import matplotlib.pyplot as plt
+plt.rcParams["axes.axisbelow"] = False
 from matplotlib.widgets import Button
 from matplotlib.collections import LineCollection
+from mpl_toolkits.axes_grid.inset_locator import inset_axes
 
 from BayHunter.utils import SerializingContext
 from BayHunter import Model
@@ -24,7 +26,6 @@ from BayHunter import utils
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('BayWatch')
 plt.ion()
-
 
 class BayWatcher(object):
 
@@ -56,7 +57,9 @@ class BayWatcher(object):
         self.mantle = self.priors['mantle']
 
         # colors only for inversion targets - modeled data
-        self.colors = ['purple', 'green', 'orange' 'red', 'brown', 'blue']
+        # self.colors = ['purple', 'green', 'orange' 'red', 'brown', 'blue']
+        self.colors = ['teal', 'lightcoral', 'saddlebrown' 'magenta', 'royalblue']
+
 
         self.targets = data_pars['targets']
         self.targetrefs = [target.ref for target in self.targets]
@@ -71,7 +74,7 @@ class BayWatcher(object):
     def init_style_dicts(self):
         obsrf = {'color': 'k', 'alpha': 0.8, 'lw': 0.5}
         obsswd = {'color': 'k', 'alpha': 0.5, 'lw': 0.5,
-                  'marker': 'x', 'ms': 3}
+                  'marker': 'x', 'ms': 3, 'elinewidth': 1}
         noise = {'lw': 0.5, 'marker': 'o', 'ms': 0.2, 'ls': '-'}
 
         self.mod = {'lw': 0.7, 'ls': '-'}
@@ -82,22 +85,26 @@ class BayWatcher(object):
 
     def init_plot(self):
         self.fig, self.axes = plt.subplots(figsize=(8, 7))
-        self.fig.canvas.set_window_title('BayWatch. Live inversion streaming.')
+        self.fig.subplots_adjust(hspace=0.9, wspace=0.1)
+        self.fig.canvas.set_window_title('BayWatch. Inversion live-stream.')
         ax1 = plt.subplot2grid((10, 8), (0, 0), rowspan=10, colspan=3)  # vel-dep
+        inax = inset_axes(ax1, width="50%", height="5%", loc=3)
         ax2 = plt.subplot2grid((10, 8), (0, 4), rowspan=2, colspan=4)  # like
         ax3 = plt.subplot2grid((10, 8), (4, 4), rowspan=3, colspan=4)  # rf
         ax4 = plt.subplot2grid((10, 8), (7, 4), rowspan=3, colspan=4)  # disp
         ax5 = plt.subplot2grid((10, 8), (2, 4), rowspan=2, colspan=4)  # noise
 
-        self.axes = [ax1, ax3, ax4, ax2, ax5]
+        self.axes = [ax1, ax3, ax4, ax2, ax5, inax]
         # -----------------------------------
         # plot 1: vs-depth model
         self.modelline, = self.axes[0].plot(np.nan, np.nan, color='k', lw=0.7)
         colors = np.arange(self.capacity)
         segments = [np.column_stack([x, y])
                     for x, y in zip(self.vs_step, self.dep_step)]
+
         lc = LineCollection(segments, cmap='plasma_r')
         lc.set_array(np.asarray(colors))
+
         self.modelcollection = self.axes[0].add_collection(lc)
         self.modelcollection.set_linewidths(0.7)
 
@@ -108,16 +115,56 @@ class BayWatcher(object):
         self.axes[0].set_ylabel('Depth in km')
         self.axes[0].grid(color='gray', ls=':')
 
+        # plot 1, vpvs
+        self.vpvsline = self.axes[5].axvline(np.nan, color='k', lw=0.7)
+        
+        a = np.repeat(([0, 1], ), self.capacity, axis=0)
+        b = np.array([[v]*2 for v in self.vpvss])
+        segments = [np.column_stack([x, y]) for x, y in zip(b, a)]
+        lc = LineCollection(segments, cmap='plasma_r')
+        lc.set_array(np.asarray(colors))
+
+        self.vpvscollection = self.axes[5].add_collection(lc)
+        self.vpvscollection.set_linewidths(0.7)
+
+        if type(self.priors['vpvs']) in [tuple,list,np.array]:
+            self.axes[5].set_xlim(self.priors['vpvs'])
+            self.axes[5].set_title('Vp/Vs', fontsize=10)
+            self.axes[5].tick_params(axis="x",direction="in", pad=-15)
+
+        elif type(self.priors['vpvs']) == float:
+            self.axes[5].set_xlim(self.priors['vpvs']-0.2, self.priors['vpvs']-0.1)
+            self.axes[5].text(0.5, 0.5, 'Vp/Vs: %.2f' % self.priors['vpvs'], 
+                                   horizontalalignment='center',
+                                   verticalalignment='center',
+                                   transform=self.axes[5].transAxes,
+                                   fontsize=11)
+            self.axes[5].set_xticks([])    
+        
+        self.axes[5].set_ylim([0, 1])
+        self.axes[5].set_yticks([])
+        
         # -----------------------------------
         # plot 2, plot3: modeled and observed data
-        self.axes[1].yaxis.tick_right()
-        self.axes[2].yaxis.tick_right()
-        self.axes[1].set_ylabel('Disp, Vs in km/s')
-        self.axes[2].set_ylabel('Qrf amplitude')
+        # self.axes[1].yaxis.tick_right()
+        # self.axes[2].yaxis.tick_right()
+        self.axes[1].set_ylabel('Vs in km/s')
+        self.axes[1].set_xlabel('Period in s')
+        self.axes[2].set_ylabel('RF amplitude')
+        self.axes[2].set_xlabel('Time in s')
+
+        self.axes[1].spines['right'].set_visible(False)
+        self.axes[1].spines['top'].set_visible(False)
+        self.axes[2].spines['right'].set_visible(False)
+        self.axes[2].spines['top'].set_visible(False)
+        self.axes[1].set_xticklabels([])
+        self.axes[2].set_xticklabels([])
+        self.axes[1].set_yticklabels([])
+        self.axes[2].set_yticklabels([])
 
         # plot obsdata
         for i, target in enumerate(self.targets):
-            x, y = target.obsdata.x, target.obsdata.y
+            x, y, yerr = target.obsdata.x, target.obsdata.y, target.obsdata.yerr
             ref = target.noiseref
 
             if ref not in ['rf', 'swd']:
@@ -126,7 +173,7 @@ class BayWatcher(object):
             idx = self.axdict[ref]['ax']
             style = self.axdict[ref]['style']
 
-            self.axes[idx].plot(x, y, **style)
+            self.axes[idx].errorbar(x, y, yerr=yerr, **style)
 
         # initiate mod data
         self.targetlines = []
@@ -143,8 +190,14 @@ class BayWatcher(object):
                 x, np.ones(x.size)*np.nan, color=color, label=label, **self.mod)
             self.targetlines.append(line)
 
-        self.axes[1].legend()
-        self.axes[2].legend()
+        hand1, lab1 = self.axes[1].get_legend_handles_labels()
+        hand2, lab2 = self.axes[2].get_legend_handles_labels()
+        handles = hand1 + hand2
+        labels = lab1 + lab2
+        self.axes[2].legend(handles, labels, loc='upper left', fancybox=True,
+                            bbox_to_anchor=(0, -0.15), frameon=True, ncol=3)
+        # self.axes[1].legend()
+        # self.axes[2].legend()
 
         # grid lines for receiver functions
         self.axes[2].axhline(0, color='k', ls='--', lw=0.5)
@@ -155,7 +208,7 @@ class BayWatcher(object):
         self.axes[3].yaxis.set_label_position("right")
         self.likeline, = self.axes[3].plot(
             np.arange(self.capacity), np.ones(self.capacity)*np.nan,
-            color='blue', lw=0.5, marker='o', ms=0.2, ls='-')
+            color='darkblue', lw=0.5, marker='o', ms=0.2, ls='-')
 
         self.axes[3].set_xlim([0, self.capacity])
         self.axes[3].grid(color='gray', ls=':')
@@ -178,22 +231,31 @@ class BayWatcher(object):
         self.axes[4].grid(color='gray', ls=':')
         self.axes[4].set_xticklabels([], visible=False)
 
+        self.axes[3].spines['top'].set_visible(False)
+        self.axes[3].spines['right'].set_visible(False)
+        self.axes[4].spines['top'].set_visible(False)
+        self.axes[4].spines['right'].set_visible(False)
+
+
         # reference model
         dep, vs = self.refmodel.get('model', ([np.nan], [np.nan]))
         noise = self.refmodel.get('noise', [np.nan, np.nan])[1::2]
         explike = self.refmodel.get('explike', np.nan)
+        vpvs = self.refmodel.get('vpvs', np.nan)
 
         self.axes[0].plot(vs, dep, color='k', ls=':')
-        self.axes[3].axhline(explike, color='blue', ls=':')
+        self.axes[5].axvline(vpvs, color='k', ls=':')
+        self.axes[3].axhline(explike, color='darkblue', ls=':')
 
         for i, sigma in enumerate(noise):
             self.axes[4].axhline(noise[i], color=self.colors[i], ls=':')
 
         # buttons
-        axprev = plt.axes([0.69, 0.01, 0.08, 0.060])
-        axnext = plt.axes([0.80, 0.01, 0.08, 0.060])
-        self.bnext = Button(axnext, '>')
-        self.bprev = Button(axprev, '<')
+        axprev = plt.axes([0.69, 0.91, 0.08, 0.060])
+        axnext = plt.axes([0.80, 0.91, 0.08, 0.060])
+
+        self.bnext = Button(axnext, '>', color='white', hovercolor='lightgray')
+        self.bprev = Button(axprev, '<', color='white', hovercolor='lightgray')
 
     def _same_event(self, event, eventtime):
         if ((self.event.x - event.x) == 0 and
@@ -308,6 +370,12 @@ class BayWatcher(object):
         self.likeline.set_ydata(self.likes)
         self.axes[3].set_ylim([np.nanmin(self.likes)*0.999,
                                np.nanmax(self.likes)*1.001])
+        
+        # vpvs
+        a = np.repeat(([0, 1], ), self.capacity, axis=0)
+        b = np.array([[v]*2 for v in self.vpvss])
+        segments = [np.column_stack([x, y]) for x, y in zip(b, a)]
+        self.vpvscollection.set_segments(segments)
 
         for i, sline in enumerate(self.sigmalines):
             if sline is not None:
@@ -439,6 +507,10 @@ class BayWatcher(object):
         segments = [np.column_stack([x, y])
                     for x, y in zip(self.vs_step, self.dep_step)]
         self.modelcollection.set_segments(segments)
+        a = np.repeat(([0, 1], ), self.capacity, axis=0)
+        b = np.array([[v]*2 for v in self.vpvss])
+        segments = [np.column_stack([x, y]) for x, y in zip(b, a)]
+        self.vpvscollection.set_segments(segments)
 
     def update_likes(self, like):
         self.likes = np.roll(self.likes, -1)

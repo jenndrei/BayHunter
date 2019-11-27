@@ -171,9 +171,14 @@ class SingleChain(object):
                 target.get_covariance = target.valuation.get_covariance_exp
                 continue
 
-            if target_noise_corr == 0:
-                # diagonal for each target, corr inrelevant for likelihood
+            if (target_noise_corr == 0 and np.any(np.isnan(target.obsdata.yerr))):
+                # diagonal for each target, corr inrelevant for likelihood, rel error
                 target.get_covariance = target.valuation.get_covariance_nocorr
+                continue
+
+            elif target_noise_corr == 0:
+                # diagonal for each target, corr inrelevant for likelihood
+                target.get_covariance = target.valuation.get_covariance_nocorr_scalederr
                 continue
 
             # gauss for RF
