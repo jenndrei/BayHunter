@@ -27,7 +27,7 @@ class ObservedData(object):
         self.yerr = yerr
 
         if self.yerr is None or np.any(yerr<=0.) or np.any(np.isnan(yerr)):
-            self.yerr = np.ones(y.size) * np.nan
+            self.yerr = np.ones(x.size) * np.nan
 
 
 class ModeledData(object):

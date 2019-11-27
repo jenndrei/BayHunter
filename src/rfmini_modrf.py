@@ -64,8 +64,8 @@ class RFminiModRF(object):
         self.nsamp = 2**int(np.ceil(np.log2(ndata * 2)))
 
     def write_startmodel(self, h, vp, vs, rho, modfile, **params):
-        qp = params.get('qp', None)
-        qs = params.get('qs', None)
+        qp = params.get('qp', np.ones(h.size) * 500)
+        qs = params.get('qs', np.ones(h.size) * 225)
 
         z = np.cumsum(h)
         z = np.concatenate(([0], z[:-1]))
