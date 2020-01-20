@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name="BayHunter",
-    version="1.0",
+    version="2.0",
     author="Jennifer Dreiling",
     author_email="jennifer.dreiling@gfz-potsdam.de",
     description=("Transdimensional Bayesian Inversion of RF and/or SWD."),
