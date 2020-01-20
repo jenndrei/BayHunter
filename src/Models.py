@@ -24,7 +24,20 @@ class Model(object):
         return n, vs, z_vnoi
 
     @staticmethod
-    def get_vp_vs_h(model, vpvs=1.73):
+    def get_vp(vs, vpvs=1.73, mantle=[4.3, 1.8]):
+        """Return vp from vs, based on crustal and mantle vpvs."""
+        ind_m = np.where((vs >= mantle[0]))[0]  # mantle
+
+        vp = vs * vpvs  # correct for crust
+        if len(ind_m) == 0:
+            return vp
+        else:
+            ind_m[0] == np.int
+            vp[ind_m[0]:] = vs[ind_m[0]:] * mantle[1]
+        return vp
+
+    @staticmethod
+    def get_vp_vs_h(model, vpvs=1.73, mantle=None):
         """Return vp, vs and h from a input model [vs, z_vnoi]"""
         n, vs, z_vnoi = Model.split_modelparams(model)
         # discontinuities:
@@ -32,13 +45,16 @@ class Model(object):
         h_lay = (z_disc - np.concatenate(([0], z_disc[:-1])))
         h = np.concatenate((h_lay, [0]))
 
-        vp = vs * vpvs
+        if mantle is not None:
+            vp = Model.get_vp(vs, vpvs, mantle)
+        else:
+            vp = vs * vpvs
         return vp, vs, h
 
     @staticmethod
-    def get_stepmodel(model, vpvs=1.73):
+    def get_stepmodel(model, vpvs=1.73, mantle=None):
         """Return a steplike model from input model, for plotting."""
-        vp, vs, h = Model.get_vp_vs_h(model, vpvs)
+        vp, vs, h = Model.get_vp_vs_h(model, vpvs, mantle)
 
         dep = np.cumsum(h)
 
@@ -53,14 +69,17 @@ class Model(object):
         return vp_step, vs_step, dep_step
 
     @staticmethod
-    def get_stepmodel_from_h(h, vs, vpvs=1.73, dep=None, vp=None):
+    def get_stepmodel_from_h(h, vs, vpvs=1.73, dep=None, vp=None, mantle=None):
         """Return a steplike model from input model."""
         # insert steps into velocity model
         if dep is None:
             dep = np.cumsum(h)
 
         if vp is None:
-            vp = vs * vpvs
+            if mantle is not None:
+                vp = Model.get_vp(vs, vpvs, mantle)
+            else:
+                vp = vs * vpvs
 
         dep = np.concatenate([(d, d) for d in dep])
         dep_step = np.concatenate([[0], dep[:-1]])
@@ -72,13 +91,13 @@ class Model(object):
         return vp_step, vs_step, dep_step
 
     @staticmethod
-    def get_interpmodel(model, dep_int, vpvs=1.73):
+    def get_interpmodel(model, dep_int, vpvs=1.73, mantle=None):
         """
         Return an interpolated stepmodel, for (histogram) plotting.
 
         Model is a vector of the parameters.
         """
-        vp_step, vs_step, dep_step = Model.get_stepmodel(model, vpvs)
+        vp_step, vs_step, dep_step = Model.get_stepmodel(model, vpvs, mantle)
         vs_int = np.interp(dep_int, dep_step, vs_step)
         vp_int = np.interp(dep_int, dep_step, vp_step)
 
@@ -207,7 +226,7 @@ class ModelMatrix(object):
 
     @staticmethod
     def get_weightedvalues(weights, models=None, likes=None, misfits=None,
-                           noiseparams=None):
+                           noiseparams=None, vpvs=None):
         """
         Return weighted matrix of models, misfits and noiseparams, and weighted
         vectors of likelihoods.
@@ -215,7 +234,7 @@ class ModelMatrix(object):
         Basically just repeats values, as given by weights.
         """
         weights = np.array(weights, dtype=int)
-        wlikes, wmisfits, wmodels, wnoise = (None, None, None, None)
+        wlikes, wmisfits, wmodels, wnoise, wvpvs = (None, None, None, None, None)
 
         if likes is not None:
             wlikes = np.repeat(likes, weights)
@@ -249,4 +268,7 @@ class ModelMatrix(object):
                     wnoise[n] = noisepars
                     n += 1
 
-        return wmodels, wlikes, wmisfits, wnoise
+        if vpvs is not None:
+            wvpvs = np.repeat(vpvs, weights)
+
+        return wmodels, wlikes, wmisfits, wnoise, wvpvs

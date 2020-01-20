@@ -56,7 +56,7 @@ yrf = _yrf + yrf_err
 
 
 #
-# -------------------------------------------  get refernece model for BayWatch
+# -------------------------------------------  get reference model for BayWatch
 #
 # Create truemodel only if you wish to have reference values in plots
 # and BayWatch. You ONLY need to assign the values in truemodel that you
@@ -88,7 +88,7 @@ print truenoise, explike
 # and phase velocity. Default is the fundamendal mode, but this can be updated.
 # For RF chose P or S. You can also use user defined targets or replace the
 # forward modeling plugin wih your own module.
-target1 = Targets.RayleighDispersionPhase(xsw, ysw)
+target1 = Targets.RayleighDispersionPhase(xsw, ysw, yerr=ysw_err)
 target2 = Targets.PReceiverFunction(xrf, yrf)
 target2.moddata.plugin.set_modelparams(gauss=1., water=0.01, p=6.4)
 
