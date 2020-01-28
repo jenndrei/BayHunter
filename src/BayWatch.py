@@ -30,7 +30,7 @@ plt.ion()
 class BayWatcher(object):
 
     def __init__(self, configfile, capacity=100, address='127.0.0.1',
-                 port=5556):
+                 port=5556, save_plots=None):
         # set up socket
         sock_addr = 'tcp://%s:%d' % (address, port)
         logger.info('Connecting to %s' % sock_addr)
@@ -38,6 +38,10 @@ class BayWatcher(object):
         self.socket = context.socket(zmq.SUB)
         self.socket.connect(sock_addr)
         self.socket.setsockopt_string(zmq.SUBSCRIBE, u'')
+        if save_plots and not op.exists(op.dirname(save_path)):
+            raise OSError('%s does not exist' % op.dirname(save_path))
+        self.save_plots = save_plots
+
 
         data_pars = utils.read_config(configfile)
         defaults = utils.get_path('defaults.ini')
@@ -72,12 +76,12 @@ class BayWatcher(object):
         self.breakloop = np.zeros(self.nchains)
 
     def init_style_dicts(self):
-        obsrf = {'color': 'k', 'alpha': 0.8, 'lw': 0.5}
-        obsswd = {'color': 'k', 'alpha': 0.5, 'lw': 0.5,
+        obsrf = {'color': 'k', 'alpha': 0.8, 'lw': 1}
+        obsswd = {'color': 'k', 'alpha': 0.5, 'lw': 1,
                   'marker': 'x', 'ms': 3, 'elinewidth': 1}
-        noise = {'lw': 0.5, 'marker': 'o', 'ms': 0.2, 'ls': '-'}
+        noise = {'lw': 1, 'marker': 'o', 'ms': 0.2, 'ls': '-'}
 
-        self.mod = {'lw': 0.7, 'ls': '-'}
+        self.mod = {'lw': 1, 'ls': '-'}
 
         self.axdict = {'rf': {'ax': 2, 'style': obsrf},
                        'swd': {'ax': 1, 'style': obsswd},
@@ -543,6 +547,8 @@ class BayWatcher(object):
         self.eventnumber = 0
         self.lastincome = time.time()
 
+        m = 0
+
         while True:
             arr = self.socket.recv_array()
 
@@ -574,6 +580,10 @@ class BayWatcher(object):
                 self.socket.close()
                 break
 
+            if self.save_plots:
+                self.fig.savefig(self.save_plots.format(count=m))
+                m += 1
+
         while True:
             self.bnext.on_clicked(self.next)
             self.bprev.on_clicked(self.prev)
@@ -582,6 +592,7 @@ class BayWatcher(object):
             self.fig.canvas.flush_events()
 
             # keyboard interrupt not working...
+            self.fig.savefig()
 
 
 def main():
@@ -603,6 +614,10 @@ def main():
     parser.add_argument(
         '--capacity', default=200, type=int,
         help='Number of displayed models, default %(default)s')
+    parser.add_argument(
+        '--save-plots', default=None, type=str,
+        help='Path to save plots, format: /path/to/plots/fig{count:04d}.png')
+
 
     args = parser.parse_args()
 
@@ -616,7 +631,7 @@ def main():
         sys.exit(1)
 
     pro = BayWatcher(configfile=configfile, capacity=args.capacity,
-                     address=args.address, port=args.port)
+                     address=args.address, port=args.port, save_plots=args.save_plots)
 
     # start baywatcher
     pro.watch()
