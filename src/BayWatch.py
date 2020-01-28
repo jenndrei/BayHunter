@@ -38,7 +38,7 @@ class BayWatcher(object):
         self.socket = context.socket(zmq.SUB)
         self.socket.connect(sock_addr)
         self.socket.setsockopt_string(zmq.SUBSCRIBE, u'')
-        if save_plots and not op.exists(op.dirname(save_path)):
+        if save_plots and not op.exists(op.dirname(save_plots)):
             raise OSError('%s does not exist' % op.dirname(save_plots))
         self.save_plots = save_plots
 
