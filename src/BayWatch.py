@@ -58,7 +58,7 @@ class BayWatcher(object):
 
         # colors only for inversion targets - modeled data
         # self.colors = ['purple', 'green', 'orange' 'red', 'brown', 'blue']
-        self.colors = ['teal', 'lightcoral', 'saddlebrown' 'magenta', 'royalblue']
+        self.colors = ['teal', 'lightcoral', 'saddlebrown', 'magenta', 'royalblue']
 
 
         self.targets = data_pars['targets']
