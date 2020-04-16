@@ -76,12 +76,12 @@ class BayWatcher(object):
         self.breakloop = np.zeros(self.nchains)
 
     def init_style_dicts(self):
-        obsrf = {'color': 'k', 'alpha': 0.8, 'lw': 1}
-        obsswd = {'color': 'k', 'alpha': 0.5, 'lw': 1,
+        obsrf = {'color': 'k', 'alpha': 0.8, 'lw': 1.2}
+        obsswd = {'color': 'k', 'alpha': 0.5, 'lw': 1.2,
                   'marker': 'x', 'ms': 3, 'elinewidth': 1}
-        noise = {'lw': 1, 'marker': 'o', 'ms': 0.2, 'ls': '-'}
+        noise = {'lw': 1.2, 'marker': 'o', 'ms': 0.2, 'ls': '-'}
 
-        self.mod = {'lw': 1, 'ls': '-'}
+        self.mod = {'lw': 1.2, 'ls': '-'}
 
         self.axdict = {'rf': {'ax': 2, 'style': obsrf},
                        'swd': {'ax': 1, 'style': obsswd},
@@ -120,7 +120,7 @@ class BayWatcher(object):
         self.axes[0].grid(color='gray', ls=':')
 
         # plot 1, vpvs
-        self.vpvsline = self.axes[5].axvline(np.nan, color='k', lw=0.7)
+        self.vpvsline = self.axes[5].axvline(np.nan, color='k', lw=1.2)
         
         a = np.repeat(([0, 1], ), self.capacity, axis=0)
         b = np.array([[v]*2 for v in self.vpvss])
@@ -212,7 +212,7 @@ class BayWatcher(object):
         self.axes[3].yaxis.set_label_position("right")
         self.likeline, = self.axes[3].plot(
             np.arange(self.capacity), np.ones(self.capacity)*np.nan,
-            color='darkblue', lw=0.5, marker='o', ms=0.2, ls='-')
+            color='darkblue', lw=1.2, marker='o', ms=0.2, ls='-')
 
         self.axes[3].set_xlim([0, self.capacity])
         self.axes[3].grid(color='gray', ls=':')
@@ -548,6 +548,7 @@ class BayWatcher(object):
         self.lastincome = time.time()
 
         m = 0
+        n = 0
 
         while True:
             arr = self.socket.recv_array()
@@ -581,8 +582,10 @@ class BayWatcher(object):
                 break
 
             if self.save_plots:
-                self.fig.savefig(self.save_plots.format(count=m))
-                m += 1
+                if n % 10 == 0:
+                    self.fig.savefig(self.save_plots.format(count=m))
+                    m += 1
+            n += 1
 
         while True:
             self.bnext.on_clicked(self.next)

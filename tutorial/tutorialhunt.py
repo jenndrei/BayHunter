@@ -116,7 +116,7 @@ priors.update({'mohoest': (38, 4),  # optional, moho estimate (mean, std)
 initparams.update({'nchains': 5,
                    'iter_burnin': (2048 * 32),
                    'iter_main': (2048 * 16),
-                   'propdist': (0.025, 0.025, 0.015, 0.005),
+                   'propdist': (0.025, 0.025, 0.015, 0.005, 0.005),
                    })
 
 

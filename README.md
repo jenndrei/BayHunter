@@ -1,14 +1,42 @@
-# BayHunter
+# BayHunter v2.0
 
-BayHunter is an open source Python tool to perform an McMC transdimensional Bayesian inversion of receiver functions and/ or surface wave dispersion. It is inverting for the velocity-depth structure, the number of layers, Vp/Vs ratio and noise parameters (noise correlation and amplitude). The forward modeling codes are provided within the package, but are easily replaceable with own codes. It is also possible to add (completely different) data sets.
+BayHunter is an open source Python tool to perform an McMC transdimensional Bayesian inversion of surface wave dispersion and/or receiver functions. The algorithm follows a data-driven strategy and solves for the velocity-depth structure, the number of layers, Vp/Vs ratio and noise parameters, i.e., data noise correlation and amplitude. The forward modeling codes are provided within the package, but are easily replaceable with own codes. It is also possible to add (completely different) data sets.
 
 The BayWatch module can be used to live-stream the inversion while it is running: this makes it easy to see how each chain is exploring the parameter space, how the data fits and models change and in which direction the inversion progresses.
 
-**Citation:**
 
-> Dreiling, Jennifer; Tilmann, Frederik (2019): BayHunter - McMC transdimensional Bayesian inversion of receiver functions and surface wave dispersion. V. 1.0. GFZ Data Services.
+### Citation
 
-[http://doi.org/10.5880/GFZ.2.4.2019.001](http://doi.org/10.5880/GFZ.2.4.2019.001)
+> Dreiling, Jennifer; Tilmann, Frederik (2019): BayHunter - McMC transdimensional Bayesian inversion of receiver functions and surface wave dispersion. GFZ Data Services. [http://doi.org/10.5880/GFZ.2.4.2019.001](http://doi.org/10.5880/GFZ.2.4.2019.001)
+
+
+### Application examples
+
+> Dreiling et al. (2020): Crustal structure of Sri Lanka derived from joint inversion of surface wave dispersion and receiver functions using a Bayesian approach. Journal of Geophysical Research: Solid Earth. [https://doi.org/10.1029/2019JB018688](https://doi.org/10.1029/2019JB018688).
+
+> Green et al. (2020): Magmatic and sedimentary structure beneath the Klyuchevskoy Volcanic Group, Kamchatka, from ambient noise tomography. Journal of Geophysical Research: Solid Earth. [https://doi.org/10.1029/2019JB018900](https://doi.org/10.1029/2019JB018900).
+
+> Mauerberger et al (n.a.): The multifaceted Scandinavian lithosphere imaged by surface waves and ambient noise. In preparation.
+
+
+### Comments and Feedback
+
+BayHunter is ready to use. It is quick and efficient and I am happy with the performance. Still,
+there are always things that can be improved to make it even faster and more efficient, and user
+friendlier. 
+
+Although we tested the software with a variety of synthetic and real data, each data set is
+still unique and shows own characteristics. If you observe any unforeseen behavior, please share
+it with me to wipe out possible problems we haven’t considered.
+
+I am happy to share my experience with you and also if you share your thoughts with me. I am looking forward to your feedback. 
+
+
+### Who am I?
+
+I am Jennifer Dreiling. I finished my PhD studies at the German Research Center for Geosciences (GFZ) in Potsdam, Germany. BayHunter was created by me in the frame of my PhD program. [Contact me](https://www.gfz-potsdam.de/en/staff/jennifer-dreiling/).
+
+
 
 ## Quick start
 
@@ -20,7 +48,7 @@ The BayWatch module can be used to live-stream the inversion while it is running
 * zmq
 * rfmini, only if inverting for RF (`rfmini.tar.gz`)
 
-### Installation (python2 environment)
+### Installation (Python 2 environment)
 
 ```sh
 git clone https://github.com/jenndrei/BayHunter.git
@@ -28,36 +56,17 @@ cd BayHunter
 sudo python setup.py install
 ```
 
-### Tutorial
+### Documentation and Tutorial
 
-An example of how to run an inversion can be found in the **tutorial folder**.
-The file to be run `tutorialhunt.py` is spiked with comments.
+The [documentation](https://github.com/jenndrei/BayHunter/raw/master/docs/BayHunter_v2.0_documentation.pdf) to BayHunter offers background information to the inversion algorithm, the parameters and usage of BayHunter and BayWatch (tutorial).
+
+An example inversion can be found in the **tutorial folder**.
+The file to be run, `tutorialhunt.py`, is spiked with comments.
 You can also create your own synthetic data set with `create_testdata.py`.
 
-Use the input file `config.ini` for adjusting the inversion parameters.
-
-More background information about how to chose the best parameters, and about BayHunter and BayWatch in general can be found in the file `docs/bayhunter.pdf`.
 
 ### References
 
-* SWD forward modeling is based on surf96 from [CPS](http://www.eas.slu.edu/eqc/eqccps.html) from Rob Herrmann, St. Louis University: BayHunter uses the python wrapper [pysurf96](https://github.com/miili/pysurf96) from Marius Isken wrapping the
-quick surf96 routine [SurfTomo](https://github.com/caiweicaiwei/SurfTomo) from Hongjian Fang.
-* RF forward modeling using [rfmini](https://git.gfz-potsdam.de/saul/rfmini) from Joachim Saul, GFZ.
-* Most influence offered the work from Bodin et al., 2012: *Transdimensional inversion of receiver functions and surface wave dispersion*.
-
-## Outlook and Feedback
-
-**BayHunter is ready to use**. It is quick and efficient and I am happy with the performance. Still, there are always things that can be improved to make it even faster and more efficient, and user friendlier.  
-
-BayHunter was mostly tested with a joint data set of RF and SWD and depths down to 80 km. Colleagues tested BayHunter using:  
-1. only one SWD with depths down to 200 km (real data)  
-2. joint SWD down to 30 km including very low surface velocities (real data)  
-3. RF and an additional user data set (synthetic data).
-
-Thus, we could eliminate some problems. However, each data set and each inversion has its own characteristics. If you observe any unforeseen behavior, please share it with me to wipe out possible problems we haven't considered.
-
-I am happy to share my experience with you and also if you share your thoughts with me. I am looking forward to your feedback. 
-
-## Who am I?
-
-I am Jennifer Dreiling, final sprint PhD candidate at GFZ (German Research Center for Geosciences) in Potsdam, Germany. BayHunter was created by me in the frame of my PhD program. [Contact me](https://www.gfz-potsdam.de/en/staff/jennifer-dreiling/).
+* SWD forward modeling is based on SURF96 from [CPS](http://www.eas.slu.edu/eqc/eqccps.html), Herrmann and Ammon, 2002. BayHunter uses a Python wrapper using [pysurf96](https://github.com/miili/pysurf96) and [SurfTomo](https://github.com/caiweicaiwei/SurfTomo).
+* RF forward modeling using **rfmini** from Joachim Saul, GFZ.
+* Most influence offered the work from [Bodin et al., 2012](https://doi.org/10.1029/2011JB008560).
