@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Introduction &#8212; BayHunter  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Algorithm" href="algorithm.html" />
+    <link rel="prev" title="Overview" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">BayHunter</a></h1>
+
+
+
+<p class="blurb">McMC trans-D Bayesian inversion of SWD and RF</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jenndrei&repo=BayHunter&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#bayes-theorem">Bayes theorem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#markov-chain-monte-carlo">Markov chain Monte Carlo</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="algorithm.html">Algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Overview</a></li>
+      <li>Next: <a href="algorithm.html" title="next chapter">Algorithm</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="introduction">
+<span id="sec-intro"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>Bayesian inversion is becoming more and more popular for several years
+and it has many advantages compared to conventional optimization
+approaches. While other methods often are more constrained and favor one
+best model based on the least misfit, an inversion after Bayes theorem
+is based on the model’s likelihood and results in probability
+distributions for each parameter of the model. The inversion result is
+represented by a collection of models (posterior distribution) that are
+consistent with the data and with the selected model priors. They image
+the solution space and disclose uncertainties and trade-offs of the
+model parameters.</p>
+<p>No open-source tools were available that suited our purpose of a joint
+inversion of SWD and RF after Bayes using a Markov chain Monte Carlo
+(McMC) sampling algorithm, and solve for the velocity-depth structure,
+the number of layers, the noise parameters, and the average crustal
+<span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> ratio. So it was natural to
+take care of this. We developed BayHunter to serve that purpose, and
+BayWatch, a module that allows to live-stream the inversion while it is
+running.</p>
+<div class="section" id="bayes-theorem">
+<h2>Bayes theorem<a class="headerlink" href="#bayes-theorem" title="Permalink to this headline">¶</a></h2>
+<p>Bayes theorem (<a class="reference internal" href="references.html"><span class="doc">Bayes, 1763</span></a>) is based on the
+relationship between inverse conditional probabilities. Assuming
+observed data <span class="math notranslate nohighlight">\(d_{obs}\)</span> and a model <span class="math notranslate nohighlight">\(m\)</span>; the probability
+that we observe <span class="math notranslate nohighlight">\(d_{obs}\)</span> given <span class="math notranslate nohighlight">\(m\)</span> is <span class="math notranslate nohighlight">\(p(d_{obs}|m)\)</span>,
+and the probability for <span class="math notranslate nohighlight">\(m\)</span> given <span class="math notranslate nohighlight">\(d_{obs}\)</span> is
+<span class="math notranslate nohighlight">\(p(m|d_{obs})\)</span>. Both occurrences are also dependent on the
+probability that <span class="math notranslate nohighlight">\(m\)</span> or <span class="math notranslate nohighlight">\(d_{obs}\)</span> is given, i.e.,
+<span class="math notranslate nohighlight">\(p(m)\)</span> and <span class="math notranslate nohighlight">\(p(d_{obs})\)</span>.</p>
+<p>The inverse conditional probability that both events occur, is given by:</p>
+<div class="math notranslate nohighlight">
+\[p(m|d_{obs}) p(d_{obs}) = p(d_{obs}|m) p(m)\]</div>
+<p>As <span class="math notranslate nohighlight">\(d_{obs}\)</span> is known as the evidence, i.e., the measurements,
+Bayes theorem can be rewritten to:</p>
+<div class="math notranslate nohighlight" id="equation-bayes">
+<span class="eqno">(1)<a class="headerlink" href="#equation-bayes" title="Permalink to this equation">¶</a></span>\[% posterior $\propto$ likelihood x prior
+p(m|d_{obs}) \propto p(d_{obs}|m) p(m)\]</div>
+<p><span class="math notranslate nohighlight">\(p(m|d_{obs})\)</span> is the posterior distribution, <span class="math notranslate nohighlight">\(p(d_{obs}|m)\)</span>
+is called the likelihood, and <span class="math notranslate nohighlight">\(p(m)\)</span> is the prior probability
+distribution.</p>
+</div>
+<div class="section" id="markov-chain-monte-carlo">
+<span id="sec-mcmc"></span><h2>Markov chain Monte Carlo<a class="headerlink" href="#markov-chain-monte-carlo" title="Permalink to this headline">¶</a></h2>
+<p>Markov chain Monte Carlo describes a sampling algorithm for sampling
+from a probability distribution. This algorithm is a combination of
+Monte Carlo, a random sampling method, and Markov chains, assuming a
+dependency between the current and the previous sample. For the exact
+implementation of the algorithm, see section <a class="reference internal" href="algorithm.html"><span class="doc">Algorithm</span></a>.</p>
+<div class="figure align-default" id="id1">
+<span id="fig-mcmc-scheme"></span><img alt="_images/exploration.png" src="_images/exploration.png" />
+<p class="caption"><span class="caption-number">Fig. 1 </span><span class="caption-text">McMC sampling scheme for one chain progressing through the parameter space. Left and right columns show iterations of the burn-in (first phase) and exploration phase (second phase), respectively, with the black box framing the exploration region as shown in the right column. Illustrated parameters are the likelihood and noise amplitude <span class="math notranslate nohighlight">\(\sigma_{SWD}\)</span>, surface vs and vp/vs, and number of crustal layers and noise amplitude <span class="math notranslate nohighlight">\(\sigma_{RF}\)</span>. The top panels reflect the optimization process based on the likelihood, while the lower panels show the parameter trade-off. Example taken from station SL10 in Sri Lanka.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p><a class="reference internal" href="#fig-mcmc-scheme"><span class="std std-numref">Figure 1</span></a> shows a real data
+example from a station in Sri Lanka (SL10), following the evolution of
+one chain through the model parameter space. Parameters are shown in
+couples, but note that the parameter space is multidimensional. In the
+burn-in phase (left column) the chain starts at a random parameter
+combination in the solution space and progresses with ongoing iterations
+towards an optimum, based on the likelihood. In the second phase (right
+column) the chain has already reached its exploration region and samples
+the posterior distribution.</p>
+<div class="figure align-default" id="id2">
+<span id="fig-mcmc-chains"></span><img alt="_images/exploration_chains.png" src="_images/exploration_chains.png" />
+<p class="caption"><span class="caption-number">Fig. 2 </span><span class="caption-text">McMC sampling scheme for one hundred chains progressing independently through the parameter space. Same parameters and parameter space as illustrated in <a class="reference internal" href="#fig-mcmc-scheme"><span class="std std-numref">Figure 1</span></a>. Black cross shows the median from the complete posterior distribution (exploration phase). Example taken from station SL10 in Sri Lanka.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<p><a class="reference internal" href="#fig-mcmc-chains"><span class="std std-numref">Figure 2</span></a> shows one hundred
+independent chains exploring the same parameter space. Each chain starts
+with a different random model, yet most chains converge to the same exploration region for sampling the posterior distribution. There are
+still chains (e.g., the two rose colored ones in the middle panel) that
+have not converged into the optimum zone when entering the exploration
+phase. If those chains do not converge to that optimum zone within the
+second phase, they probably represent outlier chains (or secondary
+minima) and should not be considered for the posterior distribution.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2020, Jennifer Dreiling.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/introduction.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

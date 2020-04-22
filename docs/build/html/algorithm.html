@@ -1,0 +1,672 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Algorithm &#8212; BayHunter  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">BayHunter</a></h1>
+
+
+
+<p class="blurb">McMC trans-D Bayesian inversion of SWD and RF</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jenndrei&repo=BayHunter&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Algorithm</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-optimizer-and-chain-modules">The Optimizer and Chain modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-saving-and-plotting-modules">The Saving and Plotting modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-baywatch-module">The BayWatch module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="introduction.html" title="previous chapter">Introduction</a></li>
+      <li>Next: <a href="tutorial.html" title="next chapter">Tutorial</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="algorithm">
+<span id="sec-baydev"></span><h1>Algorithm<a class="headerlink" href="#algorithm" title="Permalink to this headline">¶</a></h1>
+<p>BayHunter is a tool to perform McMC transdimensional Bayesian inversion
+of SWD and RF, solving for the velocity-depth structure, the number of
+layers, noise scaling parameters (correlation, sigma), and average
+crustal <span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>. The inversion
+algorithm uses multiple independent Markov chains and a random Monte
+Carlo sampling to find models with the highest likelihood.</p>
+<div class="figure align-default" id="id1">
+<span id="fig-bh-flowchart"></span><img alt="_images/bayhunt_flowchart.png" src="_images/bayhunt_flowchart.png" />
+<p class="caption"><span class="caption-number">Fig. 3 </span><span class="caption-text">Schematic workflow of an McMC chain sampling the parameter space. The posterior distribution includes all accepted models of a chain after a chosen number of iterations.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>How each chain is progressing through the parameter space is
+schematically illustrated in
+<a class="reference internal" href="#fig-bh-flowchart"><span class="std std-numref">Figure 3</span></a>. Each chain contains a
+current model. In each iteration a new model will be proposed,
+considering a proposal distribution, by modification of the current
+model. The acceptance probability is computed based on the prior,
+proposal and posterior ratios from proposal to current model. A proposed
+model gets accepted with a probability equal to the acceptance
+probability, i.e., if the likelihood of the proposed model is larger
+than the one of the current model, it gets accepted; but also models
+that are less likely than the current model get accepted with a small
+probability, which prevents the chain to get stuck in a local maximum.
+If a proposal model gets accepted, it will replace the current model; if
+not, the proposal model gets rejected and the current model stays
+unmodified. This process will be repeated for a defined number of
+iterations. Each accepted model of the exploration phase contributes to
+the posterior distribution of the parameters.</p>
+<p>Equations given below are reduced to the number of those required in BayHunter, and will not be fully deduced. For mathematical derivations and details be referred to <a class="reference internal" href="references.html"><span class="doc">Bodin (2010)</span></a> and <a class="reference internal" href="references.html"><span class="doc">Bodin et al. (2012)</span></a>, which inspired the idea of BayHunter and on which our algorithm is based on.</p>
+<div class="section" id="the-optimizer-and-chain-modules">
+<span id="sec-chainmodule"></span><h2>The Optimizer and Chain modules<a class="headerlink" href="#the-optimizer-and-chain-modules" title="Permalink to this headline">¶</a></h2>
+<p>The <em>BayHunter.mcmcOptimizer</em> manages the chains in an overarching
+module. It starts each single chain’s inversion and schedules the
+parallel computing. Each chain and its complete model data can be
+accessed (in the Python environment) after the inversion has finished.
+Before the optimizer initializes the chains, a configuration file will
+automatically be saved, which simplifies the process of illustrating
+results after an inversion.</p>
+<p>Each <em>BayHunter.SingleChain</em> explores the parameter space independently
+and collects samples by following Bayes theorem (Eq. <a class="reference internal" href="introduction.html#equation-bayes">(1)</a>). A chain has multiple tasks, which are
+described below in detail and begin with the random initialization of a
+starting model.</p>
+<div class="section" id="initialize-the-targets">
+<span id="sec-intarg"></span><h3>Initialize the targets<a class="headerlink" href="#initialize-the-targets" title="Permalink to this headline">¶</a></h3>
+<p>The first step towards an inversion is to define the target(s).
+Therefore, the user needs to pass the observed data to the designated
+BayHunter target type. For surface wave dispersion, period-velocity
+observables must be assigned to the class that handles the corresponding
+data (<em>RayleighDispersionPhase</em>, <em>RayleighDispersionGroup</em>,
+<em>LoveDispersionPhase</em>, <em>LoveDispersionGroup</em>). They default into the
+fundamental wave mode. Additionally, uncertainties can be attributed,
+which later control the weighting of each period. For receiver
+functions, observed time-amplitude data must be assigned to the
+<em>PReceiverFunction</em> (or <em>SReceiverFunction</em>) class from
+<em>BayHunter.Targets</em>. Parameters (Gauss filter width, slowness, water
+level, near surface velocity) for forward modeling should be updated, if
+the default values differ from the values used for RF computation.</p>
+<p>Each of the target classes comes with a forward modeling plugin, which
+is easily exchangeable. For surface waves, a quick Fortran routine based
+on <code class="docutils literal notranslate"><span class="pre">SURF96</span></code> (<a class="reference internal" href="references.html"><span class="doc">Herrmann and Ammon, 2002</span></a>) is
+pre-installed. For receiver functions, the plugin is based on <code class="docutils literal notranslate"><span class="pre">rfmini</span></code>
+(<a class="reference external" href="https://www.gfz-potsdam.de/en/staff/joachim-saul/">Joachim Saul, GFZ</a>). Also other targets can be defined.</p>
+</div>
+<div class="section" id="parametrization-of-the-model">
+<h3>Parametrization of the model<a class="headerlink" href="#parametrization-of-the-model" title="Permalink to this headline">¶</a></h3>
+<p>The model includes the velocity-depth structure and the noise parameters
+of the observed data.</p>
+<ul class="simple">
+<li><p><strong>Velocity-depth structure</strong></p></li>
+</ul>
+<p>The velocity-depth model is parametrized through a variable number of Voronoi nuclei, the position
+of each is given by a depth and a seismic shear wave velocity
+(<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>). A model containing only one nucleus represents a
+half-space model, two nuclei define a model with one layer over a
+half-space and so on. The layer boundary (depth of an interface) lies
+equidistant between two nuclei. The advantage to use Voronoi nuclei over
+a simple thickness-velocity representation is, that one model can be
+parametrized in many different ways. However, a set of Voronoi nuclei
+defines only one model. The number of layers in a model is undefined and
+will be inverted for (transdimensional). <span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span> is
+computed from <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> through
+<span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>, which is chosen by the user
+to be constant, or an additional parameter to solve for.</p>
+<ul class="simple">
+<li><p><strong>Covariance matrix of data noise</strong></p></li>
+</ul>
+<p>The noise level is defined by
+two parameters, the correlation <span class="math notranslate nohighlight">\(r\)</span> (i.e., the correlation of
+adjacent data points) and the noise amplitude <span class="math notranslate nohighlight">\(\sigma\)</span>. Both
+<span class="math notranslate nohighlight">\(r\)</span> and <span class="math notranslate nohighlight">\(\sigma\)</span> are treated as unknown and can be estimated
+during the inversion. They are the part of the observed data that can
+not be fitted. Hence, the observed data vector can be described as</p>
+<div class="math notranslate nohighlight">
+\[d_{obs}(i) = d_{True}(i) + \epsilon(i) \hspace{1cm}  i=[1,n]\]</div>
+<p>where <span class="math notranslate nohighlight">\(n\)</span> is the size of the vector and <span class="math notranslate nohighlight">\(\epsilon(i)\)</span>
+represents errors that are distributed according to a multivariate
+normal distribution with zero mean and covariance <span class="math notranslate nohighlight">\(C_e\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[C_e = \sigma^2R\]</div>
+<p>The covariance matrix <span class="math notranslate nohighlight">\(C_e\)</span> is dependent on <span class="math notranslate nohighlight">\(\sigma\)</span> and
+<span class="math notranslate nohighlight">\(R\)</span>, which is the symmetric diagonal-constant or Toeplitz matrix.</p>
+<div class="math notranslate nohighlight" id="equation-r">
+<span class="eqno">(2)<a class="headerlink" href="#equation-r" title="Permalink to this equation">¶</a></span>\[\begin{split}R = \begin{bmatrix}
+1 &amp; c_{1} &amp; c_{2} &amp; ... &amp; c_{n-1}\\
+c_{1} &amp; 1 &amp; c_{1} &amp; ... &amp; c_{n-2}\\
+c_{2} &amp; c_{1} &amp; 1 &amp; ... &amp; c_{n-3}\\
+ &amp;  &amp;  &amp;  \vdots &amp; \\
+c_{n-1} &amp; c_{n-2} &amp; c_{n-3} &amp; ... &amp; 1
+\end{bmatrix}\end{split}\]</div>
+<p>We consider two correlation laws for the correlation matrix <span class="math notranslate nohighlight">\(R\)</span>.
+The exponential law is given by</p>
+<div class="math notranslate nohighlight" id="equation-exp">
+<span class="eqno">(3)<a class="headerlink" href="#equation-exp" title="Permalink to this equation">¶</a></span>\[c_i = r^i\]</div>
+<p>and the Gaussian law by</p>
+<div class="math notranslate nohighlight" id="equation-gauss">
+<span class="eqno">(4)<a class="headerlink" href="#equation-gauss" title="Permalink to this equation">¶</a></span>\[c_i = r^{(i^2)}\]</div>
+<p>where <span class="math notranslate nohighlight">\(r = c_1\)</span> is a constant number between 0 and 1. In BayHunter
+we consider the exponential correlation law for surface wave dispersion,
+and both the exponential and the Gaussian law for receiver functions.</p>
+</div>
+<div class="section" id="initialize-a-model">
+<span id="sec-inmod"></span><h3>Initialize a model<a class="headerlink" href="#initialize-a-model" title="Permalink to this headline">¶</a></h3>
+<p>For each chain, the initial model parameters (starting model) are drawn
+from the uniform prior distributions. These are, for the velocity-depth
+structure, the distributions of <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>, depth, the number
+of layers and the average crustal
+<span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>. The initial model has a
+number of layers equal to the minimum value of the corresponding prior
+distribution. If set to 0, a half-space model will be drawn, if set to 1
+a one layer over a half-space model represents the initial model and so
+on. The initial number of layers determines how many Voronoi nuclei will
+be drawn, i.e., how many pairs of <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> and depth. If a
+velocity-depth model was drawn, <span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span> will be computed
+from <span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>, which was either drawn
+hitherto or given as constant by the user. If appropriate, the user may
+wish to select a mantle specific
+<span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>, by also assuming a
+<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> to distinguish the mantle from the crust. The
+density is computed by <span class="math notranslate nohighlight">\(\rho = 0.77+0.32 V_P\)</span> (<a class="reference internal" href="references.html"><span class="doc">Berteussen, 1977</span></a>).</p>
+<p>It is possible to give a single interface depth estimate (it can be any
+interface, e.g., the Moho). The estimate includes a mean and a standard
+deviation of the interface depth. When initializing a model - and only
+if an estimate was given - an interface depth is drawn from the given
+normal distribution and two nuclei will be placed equidistant to the
+interface. If the initial model only consists of a half-space, the
+interface estimate will be ignored. Giving an estimate can help the
+chains to converge more quickly, e.g., if computation capacity is
+limited, but might generate biased posterior distributions.</p>
+<p>Each target has two noise scaling parameters (<span class="math notranslate nohighlight">\(r\)</span>,
+<span class="math notranslate nohighlight">\(\sigma\)</span>). The user needs to define the prior distributions for
+the overarching target type, i.e., SWD and RF, nevertheless, each target
+will sample an own posterior distribution. Single noise parameters can
+also be set constant during an inversion by giving a single digit,
+instead of a range. Initial values are then the given digits, and/or
+will be drawn from the prior range.</p>
+<p>The drawn starting model automatically is assigned as the current model
+of the chain. The corresponding likelihood is computed. This model is
+also the first model in the model chain that gets collected for the
+burn-in phase.</p>
+</div>
+<div class="section" id="computation-of-model-likelihood">
+<span id="sec-complike"></span><h3>Computation of model likelihood<a class="headerlink" href="#computation-of-model-likelihood" title="Permalink to this headline">¶</a></h3>
+<p>The likelihood is an estimate of the probability of observing the
+measured data given a particular model <span class="math notranslate nohighlight">\(m\)</span>. It is an important
+measure for accepting and declining proposal models. The likelihood
+function is</p>
+<div class="math notranslate nohighlight" id="equation-like">
+<span class="eqno">(5)<a class="headerlink" href="#equation-like" title="Permalink to this equation">¶</a></span>\[p(d_{obs}|m) = \frac{1}{\sqrt{(2\pi)^n|C_e|}} \times exp\left\lbrace \frac{-\Phi(m)}{2}\right\rbrace\]</div>
+<p>where <span class="math notranslate nohighlight">\(\Phi(m)\)</span> is the Mahalanobis distance (<a class="reference internal" href="references.html"><span class="doc">Mahalanobis, 1936</span></a>), i.e., the
+multidimensional distance between observed <span class="math notranslate nohighlight">\(d_{obs}\)</span> and estimated
+<span class="math notranslate nohighlight">\(g(m)\)</span> data vectors.</p>
+<div class="math notranslate nohighlight" id="equation-mahadist">
+<span class="eqno">(6)<a class="headerlink" href="#equation-mahadist" title="Permalink to this equation">¶</a></span>\[\Phi(m) = (g(m)-d_{obs})^T C_{e}^{-1} (g(m)-d_{obs})\]</div>
+<p>As the likelihood often results in very small numbers, the
+log-likelihood is preferred.</p>
+<div class="math notranslate nohighlight" id="equation-loglike">
+<span class="eqno">(7)<a class="headerlink" href="#equation-loglike" title="Permalink to this equation">¶</a></span>\[\log p(d_{obs}|m) = - \frac{n}{2} \log(2\pi) - \frac{1}{2} \log(|C_e|) - \frac{\Phi(m)}{2}\]</div>
+<p>The computation of the likelihood needs the inverse <span class="math notranslate nohighlight">\(C_{e}^{-1}\)</span>
+and determinant <span class="math notranslate nohighlight">\(|C_e|\)</span> of the covariance matrix. For the
+exponential correlation law (Eq. <a class="reference internal" href="#equation-exp">(3)</a>), the covariance
+matrix is described by</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}C_e = \sigma^2\begin{bmatrix}
+1 &amp; r &amp; r^{2} &amp; ... &amp; r^{n-1}\\
+r &amp; 1 &amp; r &amp; ... &amp; r^{n-2}\\
+r^{2} &amp; r &amp; 1 &amp; ... &amp; r^{n-3}\\
+ &amp;  &amp;  &amp;  \vdots &amp; \\
+r^{n-1} &amp; r^{n-2} &amp; r^{n-3} &amp; ... &amp; 1
+\end{bmatrix}\end{split}\]</div>
+<p><span class="math notranslate nohighlight">\(C_{e}^{-1}\)</span> and <span class="math notranslate nohighlight">\(|C_e|\)</span> can be solved through linear
+algebra, and are given by the analytical forms</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}C_e^{-1} = \frac{1}{\sigma^2(1-r^2)}
+\begin{bmatrix}
+1 &amp; -r &amp; 0 &amp; ... &amp; 0 &amp; 0\\
+-r &amp; 1 + r^2 &amp; -r &amp; ... &amp; 0 &amp; 0\\
+0 &amp; -r &amp; 1+r^2 &amp; ... &amp; 0 &amp; 0\\
+ &amp;  &amp;  &amp;  \vdots &amp; &amp; \\
+0 &amp; 0 &amp; 0 &amp; ... &amp; 1+r^2 &amp; -r\\
+0 &amp; 0 &amp; 0 &amp; ... &amp; -r &amp; 1
+\end{bmatrix}\end{split}\]</div>
+<p>and</p>
+<div class="math notranslate nohighlight">
+\[|C_e| = \sigma^{2n}(1-r^2)^{n-1}\]</div>
+<p>These can be easily constructed and quickly computed in the Python
+language. Obviously, if the correlation of noise <span class="math notranslate nohighlight">\(r=0\)</span>, the
+matrices <span class="math notranslate nohighlight">\(R\)</span> (Eq. <a class="reference internal" href="#equation-r">(2)</a>) and <span class="math notranslate nohighlight">\(R^{-1}\)</span> are
+simply formed by the diagonal matrix, and the determinant is given by
+<span class="math notranslate nohighlight">\(\sigma^{2n}\)</span>. This is the default case for surface wave
+dispersion. If the dispersion measurements were assigned uncertainty
+values, then <span class="math notranslate nohighlight">\(\sigma^{2}\)</span> is weighted by the relative
+uncertainties.</p>
+<p>For receiver functions, unless they are computed utilizing an
+exponential filter, the Gaussian correlation law
+(Eq. <a class="reference internal" href="#equation-gauss">(4)</a>) should be considered. In this case
+<span class="math notranslate nohighlight">\(C_{e}^{-1}\)</span> and <span class="math notranslate nohighlight">\(|C_e|\)</span> cannot be solved analytically and
+the numerical computation of these is necessary. Considering a numerical
+computation each time a noise parameter is perturbed will increase the
+computation time tremendously. A trick to speed up the computation is
+accompanied by estimating <span class="math notranslate nohighlight">\(r\)</span> priorly and keeping it constant
+during the inversion. The equations</p>
+<div class="math notranslate nohighlight">
+\[C_e^{-1} = (\sigma^2R)^{-1} = \frac{1}{\sigma^2}R^{-1}\]</div>
+<p>and</p>
+<div class="math notranslate nohighlight">
+\[|C_e| = |\sigma^2R| = \sigma^{2n}|R|\]</div>
+<p>show, that <span class="math notranslate nohighlight">\(R^{-1}\)</span> and <span class="math notranslate nohighlight">\(|R|\)</span> can be isolated from
+<span class="math notranslate nohighlight">\(\sigma\)</span>. Therefore, the numerical computations of <span class="math notranslate nohighlight">\(R\)</span>,
+<span class="math notranslate nohighlight">\(R^{-1}\)</span> and <span class="math notranslate nohighlight">\(|R|\)</span> will be executed only once at the
+beginning of the inversion. <span class="math notranslate nohighlight">\(R^{-1}\)</span> and <span class="math notranslate nohighlight">\(|R|\)</span> will be
+multiplied by the <span class="math notranslate nohighlight">\(\sigma\)</span>-terms and used in
+Eqs. <a class="reference internal" href="#equation-mahadist">(6)</a> and <a class="reference internal" href="#equation-loglike">(7)</a> to compute the likelihood. The
+correlation parameter <span class="math notranslate nohighlight">\(r\)</span> in <span class="math notranslate nohighlight">\(R\)</span> needs to be chosen by the
+user, but can be estimated. If <span class="math notranslate nohighlight">\(r\)</span> is set too large,
+<span class="math notranslate nohighlight">\(R^{-1}\)</span> becomes instable and small eigenvalues need to be
+suppressed.</p>
+<p>The likelihood for inversions of multiple data sets is computed by the
+sum of the log-likelihoods from different targets.</p>
+</div>
+<div class="section" id="propose-a-model">
+<span id="sec-propmod"></span><h3>Propose a model<a class="headerlink" href="#propose-a-model" title="Permalink to this headline">¶</a></h3>
+<p>At each iteration a new model is proposed using one of six modification
+methods. The method is drawn randomly and the current model will be
+modified according to the method’s proposal distribution. Either a
+parameter is modified (<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> or depth of Voronoi nucleus,
+<span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>, <span class="math notranslate nohighlight">\(r\)</span>, <span class="math notranslate nohighlight">\(\sigma\)</span>) or
+the dimension of parameters, i.e., the number of layers in the
+velocity-depth structure (layer birth, death). The methods are
+summarized below.</p>
+<blockquote>
+<div><div class="line-block">
+<div class="line">(1) Modification of <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> (Voronoi nucleus)</div>
+<div class="line">(2) Modification of depth (Voronoi nucleus)</div>
+<div class="line">(3) Modification of crustal <span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span></div>
+<div class="line">(4) Modification of a noise parameter (<span class="math notranslate nohighlight">\(r\)</span>, <span class="math notranslate nohighlight">\(\sigma\)</span>)</div>
+<div class="line">(5) Modification of dimension (layer birth)</div>
+<div class="line">(6) Modification of dimension (layer death)</div>
+</div>
+</div></blockquote>
+<p>Each method except (4) is altering the velocity-depth structure. For (1)
+and (2), a random Voronoi nucleus from the current model is selected.
+For (1), the <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> of the nucleus is modified according
+to the proposal distribution of <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>. Therefore, a
+sample from this normal distribution (centered at zero) is drawn and
+added to the current <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> value of the nucleus. For (2),
+a sample from the depth proposal distribution is drawn and added to the
+depth-coordinate of the nucleus. For (3), if not constant, a sample from
+the <span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> proposal distribution is
+drawn and added to the <span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> value
+of the current model. For (4), one random noise parameter from one
+target is selected (<span class="math notranslate nohighlight">\(r\)</span> or <span class="math notranslate nohighlight">\(\sigma\)</span>). This parameter, if not
+constant, is modified according to the procedure before and according to
+its own proposal distribution. <span class="math notranslate nohighlight">\(C_e\)</span> assumed for surface wave
+dispersion is based on the exponential law. For receiver functions, the
+exponential law is only assumed, if the user wants to invert for
+<span class="math notranslate nohighlight">\(r\)</span>. If <span class="math notranslate nohighlight">\(r\)</span> is given by a constant, automatically the
+Gaussian correlation law is considered.</p>
+<p>For (5) and (6), the proposal distributions are equal. For (5), a random
+depth-value will be drawn from the uniform depth prior distribution,
+where a new Voronoi nucleus will be born. The new velocity of this
+nucleus will be computed by the current model velocity at the drawn
+depth, modified by the proposal distribution. For (6), a random nucleus
+from the nuclei ensemble of the current model is chosen and removed.
+Here, the proposal distribution is only relevant for the computation of
+the acceptance probability, not for the actual modification of the
+model. Note that the proposal distributions for (5) and (6) relate to
+<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>.</p>
+<p>For the six modification methods, the user must define five normal
+distributions as initial proposal distributions by giving their standard
+deviations. For the model modification methods (1)-(4), it is obvious,
+that small standard deviations of the distributions cause a high chance
+of only small parameter changes. So, the proposal models are very
+similar to the current model. On the other hand, if the proposal
+distribution width is large, the modifications tend to be larger and the
+proposal models are likely to be more different from the current model.
+For (5) and (6) however, the proposal distribution only plays a
+subordinate role. If a random nucleus is added or removed, the complete
+model structure between the adjacent nuclei is modified, which can cause
+large interface depth shifts – dependent on the proximity of the
+adjacent nuclei. A nucleus birth with a <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>
+modification of zero would still result in a shift of the layer
+interface.</p>
+<p>The initial width of the proposal distribution, however, will be
+adjusted during the inversion to reach and maintain a specific
+acceptance rate of proposal models (see <a class="reference internal" href="tutorial.html#sec-parsetup"><span class="std std-ref">Setting up parameters</span></a>).</p>
+<p>As a feature in BayHunter, dimension modifications are disallowed in the
+first 1 % of the iterations. This enables a first simple approximation
+of the <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth structure, before turning into more
+complex models by allowing layer birth and death. This is especially
+important if the inversion is only constrained by surface wave
+dispersion data.</p>
+</div>
+<div class="section" id="accept-a-model">
+<h3>Accept a model<a class="headerlink" href="#accept-a-model" title="Permalink to this headline">¶</a></h3>
+<p>After a model is proposed, it needs to be evaluated in comparison to the
+current model. Therefore, the acceptance probability <span class="math notranslate nohighlight">\(\alpha\)</span> is
+computed. If any parameter of the proposed model does not lie within its
+prior distribution, the acceptance probability drops to zero and the
+model will automatically be declined. A model parameter can only lie
+outside the prior if the current value of it is very close to the prior
+limits or its proposal distribution width is very large. Further
+criteria that will force a refusal of the proposal model by setting
+<span class="math notranslate nohighlight">\(\alpha\)</span> = 0:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>a layer thickness is smaller than <span class="math notranslate nohighlight">\(thickmin\)</span></p></li>
+<li><p>a low / high velocity zone does not fulfill the user defined constraint</p></li>
+</ul>
+</div></blockquote>
+<p>If a model proposal clears the above criteria, the actual acceptance
+probability <span class="math notranslate nohighlight">\(\alpha\)</span> is computed. The acceptance probability is a
+combined probability and will be computed from the prior, proposal and
+likelihood ratios of the proposal model <span class="math notranslate nohighlight">\(m'\)</span> and the current model
+<span class="math notranslate nohighlight">\(m\)</span>.</p>
+<blockquote>
+<div><p><span class="math notranslate nohighlight">\(\alpha\)</span> = prior ratio x likelihood ratio x proposal ratio x Jacobian</p>
+</div></blockquote>
+<div class="math notranslate nohighlight">
+\[\alpha(m'|m) = \frac{p(m')}{p(m)} \times \frac{p(d_{obs}|m')}{p(d_{obs}|m)} \times \frac{q(m|m')}{q(m'|m)} \times |J|\]</div>
+<p>The determinant of the Jacobian matrix equals 1 in any case of
+modification. Furthermore, the acceptance term can be rearranged
+dependent on the type of model modification.</p>
+<ul class="simple">
+<li><p><strong>Voronoi nucleus position,</strong> <span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> <strong>, and covariance matrix</strong></p></li>
+</ul>
+<p>The modification of the nucleus position (i.e., <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>
+and depth), <span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> and the
+covariance matrix (i.e., <span class="math notranslate nohighlight">\(r\)</span> and <span class="math notranslate nohighlight">\(\sigma\)</span>) do not involve
+a change of dimension. For these model proposals, the prior ratio
+equals 1 and the proposal distributions are symmetrical, i.e., the
+probability to go from <span class="math notranslate nohighlight">\(m\)</span> to <span class="math notranslate nohighlight">\(m'\)</span> is equal to the
+probability to go from <span class="math notranslate nohighlight">\(m'\)</span> to <span class="math notranslate nohighlight">\(m\)</span>. Hence, the proposal
+ratio also equals 1. We can shorten the acceptance probability to the
+likelihood ratio:</p>
+<div class="math notranslate nohighlight">
+\[\alpha(m'|m) = \frac{p(d_{obs}|m')}{p(d_{obs}|m)}\]</div>
+<p>If the Voronoi nucleus position or
+<span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> was modified, the factor
+<span class="math notranslate nohighlight">\(\frac{1}{\sqrt{(2\pi)^n|C_e|}}\)</span> in the likelihood function
+(Eq. <a class="reference internal" href="#equation-like">(5)</a>) is equal for proposed and current model
+and cancels out. Thus, <span class="math notranslate nohighlight">\(\alpha\)</span> is only dependent on the
+Mahalanobis distance and is defined as:</p>
+<div class="math notranslate nohighlight">
+\[\alpha(m'|m) = exp\left\lbrace - \frac{\Phi(m')-\Phi(m)}{2}\right\rbrace\]</div>
+<p>If a noise parameter was modified, <span class="math notranslate nohighlight">\(C_e\)</span> are different for
+proposal and current model; therefore the mentioned factor in the
+likelihood function must be included in the computation of
+<span class="math notranslate nohighlight">\(\alpha\)</span>. Note that the Mahalanobis distance also includes the
+covariance matrix <span class="math notranslate nohighlight">\(C_e\)</span>. The acceptance probability computes as
+follows:</p>
+<div class="math notranslate nohighlight">
+\[\alpha(m'|m) = \left( \frac{|C_e|}{|C'_e|} \right)^\frac{1}{2} \times exp\left\lbrace - \frac{\Phi(m')-\Phi(m)}{2}\right\rbrace\]</div>
+<ul class="simple">
+<li><p><strong>Dimension change of velocity-depth model</strong></p></li>
+</ul>
+<p>A dimension change of a model implies the birth or death of a Voronoi nucleus, which
+corresponds to a layer birth or death. In this case, the prior and
+proposal ratios are no longer unity. For a birth step, the acceptance
+probability equals:</p>
+<div class="math notranslate nohighlight">
+\[\alpha(m'|m) = \frac{\theta \sqrt{2\pi}}{\Delta v} \times exp\left\lbrace \frac{(v'_{k+1} - v_i)^2}{2\theta^2} - \frac{\Phi(m')-\Phi(m)}{2}\right\rbrace\]</div>
+<p>where <span class="math notranslate nohighlight">\(i\)</span> indicates the layer in the current Voronoi tessellation
+<span class="math notranslate nohighlight">\(c\)</span> that contains the depth <span class="math notranslate nohighlight">\(c'_{k+1}\)</span> where the birth takes
+place. <span class="math notranslate nohighlight">\(v_i\)</span> and <span class="math notranslate nohighlight">\(v'_{k+1}\)</span> are the velocities at given
+depth of the current and the proposal model, i.e., before and after the
+birth. <span class="math notranslate nohighlight">\(\theta\)</span> is the standard deviation of the proposal
+distribution for a dimension change. The acceptance probability of the
+birth step is a balance between the proposal probability (which
+encourages velocities to change) and the difference in data misfit which
+penalizes velocities if they change so much that they degrade the fit to
+the data.</p>
+<p>The acceptance probability for a death of a Voronoi nucleus is:</p>
+<div class="math notranslate nohighlight">
+\[\alpha(m'|m) = \frac{\Delta v}{\theta \sqrt{2\pi}} \times exp\left\lbrace - \frac{(v'_j - v_i)^2}{2\theta^2} - \frac{\Phi(m')-\Phi(m)}{2}\right\rbrace\]</div>
+<p>where <span class="math notranslate nohighlight">\(i\)</span> indicates the layer that was removed from the current
+tessellation <span class="math notranslate nohighlight">\(c\)</span> and <span class="math notranslate nohighlight">\(j\)</span> indicates the cell in the proposed
+Voronoi tessellation c’ that contains the deleted point <span class="math notranslate nohighlight">\(c_i\)</span>.
+<span class="math notranslate nohighlight">\(v_i\)</span> and <span class="math notranslate nohighlight">\(v'_j\)</span> are corresponding velocities.</p>
+<p>The proposal candidate will be accepted with a probability of
+<span class="math notranslate nohighlight">\(\alpha\)</span>, or rejected with a probability of <span class="math notranslate nohighlight">\(1-\alpha\)</span>. The
+computational implementation is a comparison of <span class="math notranslate nohighlight">\(\alpha\)</span> to a
+number <span class="math notranslate nohighlight">\(u\)</span>, which is randomly drawn from a uniform distribution
+between 0–1. The model is accepted if <span class="math notranslate nohighlight">\(\alpha&gt;u\)</span>, which is always
+the case if <span class="math notranslate nohighlight">\(\alpha&gt;1\)</span>. As we consider the log-space for our
+computations, we use <span class="math notranslate nohighlight">\(\log(\alpha)\)</span> and <span class="math notranslate nohighlight">\(\log(u)\)</span>.</p>
+<p>When a proposal model is accepted, it will replace the current model. On
+the other hand, when a model is rejected, the current model stays
+unmodified. In the next iteration, a new model is proposed. This process
+will be repeated until the defined number of iterations is reached. The
+accepted models form the Markov chain and define the posterior
+distribution of the parameters after the burn-in phase.</p>
+</div>
+<div class="section" id="the-posterior-distribution">
+<h3>The posterior distribution<a class="headerlink" href="#the-posterior-distribution" title="Permalink to this headline">¶</a></h3>
+<p>After a chain has finished its iterations, it automatically saves ten
+output files in <code class="docutils literal notranslate"><span class="pre">.npy</span></code> format (NumPy binary file), holding
+<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth models, noise parameters,
+<span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> ratios, likelihoods and
+misfits for the burn-in (p1) and the posterior sampling phase (p2),
+respectively. Every <span class="math notranslate nohighlight">\(i\)</span>-th chain model is saved to receive a
+p2-model collection of <span class="math notranslate nohighlight">\(\sim\)</span> <em>maxmodels</em>, a constraint given by
+the user. The files are saved in <em>savepath/data</em> as follows:</p>
+<table class="docutils align-default" style="width: 70%">
+<colgroup>
+<col style="width: 48%" />
+<col style="width: 52%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">c*_p1models.npy</span></code>
+<code class="docutils literal notranslate"><span class="pre">c*_p1noise.npy</span></code>
+<code class="docutils literal notranslate"><span class="pre">c*_p1vpvs.npy</span></code>
+<code class="docutils literal notranslate"><span class="pre">c*_p1likes.npy</span></code>
+<code class="docutils literal notranslate"><span class="pre">c*_p1misfits.npy</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">c*_p2models.npy</span></code>
+<code class="docutils literal notranslate"><span class="pre">c*_p2noise.npy</span></code>
+<code class="docutils literal notranslate"><span class="pre">c*_p2vpvs.npy</span></code>
+<code class="docutils literal notranslate"><span class="pre">c*_p2likes.npy</span></code>
+<code class="docutils literal notranslate"><span class="pre">c*_p2misfits.npy</span></code></p></td>
+</tr>
+<tr class="row-even"><td colspan="2"><p>*three-digit chain identifier number</p></td>
+</tr>
+</tbody>
+</table>
+<p>While <span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> and the likelihood are
+vectors with the lengths defined by <em>maxmodels</em>, the models, noise and
+misfit values are represented by matrices, additionally dependent on the
+maximum number of model layers and the number of targets, both also
+defined by the user. The models are saved as Voronoi nuclei
+representation. For noise parameters, the matrix contains <span class="math notranslate nohighlight">\(r\)</span> and
+<span class="math notranslate nohighlight">\(\sigma\)</span> of each target. For the RMS data misfit, the matrix is
+composed of the misfit from each target and the joint misfit.</p>
+</div>
+</div>
+<div class="section" id="the-saving-and-plotting-modules">
+<h2>The Saving and Plotting modules<a class="headerlink" href="#the-saving-and-plotting-modules" title="Permalink to this headline">¶</a></h2>
+<p>The <em>BayHunter.Plotting</em> module cannot only be utilized for data
+illustration, but also for outlier detection and re-saving of
+<em>BayHunter.SingleChain</em> results.</p>
+<div class="section" id="outlier-detection">
+<h3>Outlier detection<a class="headerlink" href="#outlier-detection" title="Permalink to this headline">¶</a></h3>
+<p>Not every chain converges to the optimum solution space. BayHunter
+provides a method for outlier chain detection based on the median
+likelihood. For each chain, the median likelihood of the exploration
+phase is computed. A threshold is computed below which chains are
+declared as outliers. The threshold is a percentage of the maximum
+reached median likelihood from the chain ensemble. The percentage is
+defined by the user in terms of deviation from the maximum likelihood.
+For instance, if the deviation <span class="math notranslate nohighlight">\(dev\)</span>=0.05 (5 %), all chains not
+reaching a median likelihood of 95 % of the maximum median likelihood,
+are declared as outlier chains. If no or another outlier detection
+method is preferred, the user may chose a large value for <span class="math notranslate nohighlight">\(dev\)</span>,
+e.g., <span class="math notranslate nohighlight">\(dev\)</span>=5. The chain identifiers of the outlier chains will
+be saved to a file, which will be overwritten when repeating outlier
+detection.</p>
+</div>
+<div class="section" id="final-posterior-distribution">
+<h3>Final posterior distribution<a class="headerlink" href="#final-posterior-distribution" title="Permalink to this headline">¶</a></h3>
+<p>The <em>BayHunter.PlotFromStorage</em> class provides a method called
+<em>save_final_distribution</em>, which can be used to combine
+<em>BayHunter.SingleChain</em> results and store final posterior distribution
+files. Therefore, two arguments need to be chosen. The deviation
+<span class="math notranslate nohighlight">\(dev\)</span> is considered for outlier detection. <em>maxmodels</em> is the
+number of models that define the final posterior distribution. An equal
+number of p2-models per chain (except outlier chains) is chosen to
+assemble the posterior distribution of the inversion. Five files will be
+saved in <code class="docutils literal notranslate"><span class="pre">savepath/data</span></code> and represent the <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth
+models, noise parameters, <span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>
+ratios, likelihoods and misfits, respectively. The filename contains
+neither a chain identifier nor a phase tag and is e.g., for the
+<span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> ratios: <code class="docutils literal notranslate"><span class="pre">c_vpvs.npy</span></code>.</p>
+</div>
+<div class="section" id="plotting-methods">
+<h3>Plotting methods<a class="headerlink" href="#plotting-methods" title="Permalink to this headline">¶</a></h3>
+<p>The plotting methods utilize the configuration file that was stored by
+the Optimizer module after initiation of the inversion. A list of
+plotting methods is presented below. Plots generated by these methods
+can be found in <a class="reference internal" href="tutorial.html#sec-testdata"><span class="std std-ref">Testing with synthetic data</span></a>.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 42%" />
+<col style="width: 40%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>plot_iiter*</p></td>
+<td><p>* likes, nlayers, noise, vpvs, misfits</p></td>
+<td><p>parameter with iterations
+(<a class="reference internal" href="tutorial.html#fig-bh-iiter"><span class="std std-numref">Fig. 5</span></a>)</p></td>
+</tr>
+<tr class="row-even"><td><p>plot_posterior_*</p></td>
+<td><p>* likes, nlayers, noise, vpvs, misfits,
+models1d, models2d</p></td>
+<td><p>parameter posterior distribution or
+<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth models
+(<a class="reference internal" href="tutorial.html#fig-bh-models"><span class="std std-numref">Fig. 7</span></a>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>plot_current*,
+plot_best*</p></td>
+<td><p>* datafits, models</p></td>
+<td><p>data fits or <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth
+models from current or likeliest models
+(<a class="reference internal" href="tutorial.html#fig-bh-datafits"><span class="std std-numref">Fig. 6</span></a>)</p></td>
+</tr>
+<tr class="row-even"><td><p>plot_refmodel</p></td>
+<td colspan="2"><p>add reference model to posterior distributions
+(<a class="reference internal" href="tutorial.html#fig-bh-datafits"><span class="std std-numref">Figs. 6</span></a> and <a class="reference internal" href="tutorial.html#fig-bh-models"><span class="std std-numref">7</span></a>)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="the-baywatch-module">
+<h2>The BayWatch module<a class="headerlink" href="#the-baywatch-module" title="Permalink to this headline">¶</a></h2>
+<p>During a BayHunter inversion the user can live-stream progress and
+results with the BayWatch graphical interface. This makes it easy to see
+how chains explore the parameter space, how the data fits and models
+change, in which direction the inversion progresses and if it is
+necessary to adjust parameters or prior settings. If the user sets
+<span class="math notranslate nohighlight">\(baywatch\)</span>=<span class="math notranslate nohighlight">\(True\)</span> in the inversion start command,
+BayHunter spawns a process only for streaming out the latest chain
+models. When starting BayWatch, those models are received and
+temporarily stored in memory, and will be visualized as shown in the
+screen shot (<a class="reference internal" href="#fig-bh-watch"><span class="std std-numref">Figure 4</span></a>).</p>
+<div class="figure align-default" id="fig-bh-watch">
+<img alt="_images/baywatch0082.png" src="_images/baywatch0082.png" />
+</div>
+<p>Screen shot of BayWatch live-stream showing the evolution of chain models with likelihood, i.e., the evolution of the <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth structure, <span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> (with the darkest colored model being the current model) and <span class="math notranslate nohighlight">\(\sigma\)</span> (sigma) for the two targets. The live-stream shows an inversion of synthetic data from a six-layer velocity-depth model as described in <a class="reference internal" href="tutorial.html#sec-testdata"><span class="std std-ref">Testing with synthetic data</span></a>. The Colored dotted lines represent the “true” model values.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2020, Jennifer Dreiling.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/algorithm.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

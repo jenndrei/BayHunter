@@ -1,0 +1,674 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Tutorial &#8212; BayHunter  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="References" href="references.html" />
+    <link rel="prev" title="Algorithm" href="algorithm.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">BayHunter</a></h1>
+
+
+
+<p class="blurb">McMC trans-D Bayesian inversion of SWD and RF</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jenndrei&repo=BayHunter&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithm.html">Algorithm</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requirements-and-installation">Requirements and installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-and-running-an-inversion">Setting up and running an inversion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-with-synthetic-data">Testing with synthetic data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="algorithm.html" title="previous chapter">Algorithm</a></li>
+      <li>Next: <a href="references.html" title="next chapter">References</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="tutorial">
+<span id="sec-tutorial"></span><h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<p>This chapter contains the installation instructions of BayHunter,
+followed by an example of how to set up and run an inversion. A
+minimalistic working example is shown in the <a class="reference internal" href="appendix.html"><span class="doc">Appendix</span></a>. Furthermore, results from an inversion using synthetic data are shown and discussed. Be here also referred to the <a class="reference external" href="https://github.com/jenndrei/BayHunter/tutorial">full tutorial</a> including data files.</p>
+<div class="section" id="requirements-and-installation">
+<h2>Requirements and installation<a class="headerlink" href="#requirements-and-installation" title="Permalink to this headline">¶</a></h2>
+<p>BayHunter is currently for a Python 2 environment (as of October, 2019). After installation of the required Python-modules, simply type the following to install BayHunter:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 71%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">numpy</span></code></p></td>
+<td><p>numerical computations</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">matplotlib</span></code></p></td>
+<td><p>plotting library</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pyPdf</span></code></p></td>
+<td><p>merging PDFs</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">configobj</span></code></p></td>
+<td><p>configuration file</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">zmq</span></code></p></td>
+<td><p>BayWatch, inversion live-streaming</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rfmini</span></code></p></td>
+<td><p>receiver function forward modeling</p></td>
+</tr>
+</tbody>
+</table>
+<p>The Fortran forward modeling code for surface wave dispersion is already
+included in the BayHunter package and will be compiled when installing
+BayHunter. BayHunter uses a Python wrapper interfacing the
+<code class="docutils literal notranslate"><span class="pre">SURF96</span></code> routine from <a class="reference internal" href="references.html"><span class="doc">Herrmann and Ammon, 2002</span></a>. The code to forward model receiver functions, however, must be installed
+(only if wished to invert for receiver functions). A copy of <code class="docutils literal notranslate"><span class="pre">rfmini</span></code> and
+installation instructions can be found in the BayHunter package
+(<code class="docutils literal notranslate"><span class="pre">rfmini.tar.gz</span></code>). The code <code class="docutils literal notranslate"><span class="pre">rfmini</span></code> was developed for BayHunter by
+<a class="reference external" href="https://www.gfz-potsdam.de/en/staff/joachim-saul/">Joachim Saul, GFZ</a>.</p>
+</div>
+<div class="section" id="setting-up-and-running-an-inversion">
+<span id="sec-baysetup"></span><h2>Setting up and running an inversion<a class="headerlink" href="#setting-up-and-running-an-inversion" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="setting-up-the-targets">
+<h3>Setting up the targets<a class="headerlink" href="#setting-up-the-targets" title="Permalink to this headline">¶</a></h3>
+<p>As mentioned in <a class="reference internal" href="algorithm.html#sec-intarg"><span class="std std-ref">Initialize the targets</span></a>, BayHunter provides six target classes (four SWD and two RF),
+which use two types of forward modeling plugins (<code class="docutils literal notranslate"><span class="pre">SURF96</span></code>,
+<code class="docutils literal notranslate"><span class="pre">rfmini</span></code>). For both targets, the user may update the default forward
+modeling parameters with <em>set_modelparams</em> (see <a class="reference internal" href="appendix.html"><span class="doc">Appendix</span></a>). Parameters and default values are given in <a class="reference internal" href="#tab-targetpars"><span class="std std-numref">Table 1</span></a>.</p>
+<div class="docutils container" id="tab-targetpars">
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-number">Table 1 </span><span class="caption-text">Default forward modeling parameters for SWD and RF.</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 24%" />
+<col style="width: 69%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>SWD</p></td>
+<td><p>mode = 1</p></td>
+<td><p>1=fundamental mode, 2=1st higher mode, etc.</p></td>
+</tr>
+<tr class="row-even"><td><p>RF</p></td>
+<td><p>gauss = 1.0</p></td>
+<td><p>Gauss factor, low pass filter</p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p>water = 0.001</p></td>
+<td><p>water level stabilization</p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p>p = 6.4</p></td>
+<td><p>slowness in deg/s</p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p>nsv = <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>near surface velocity in km/s for computation
+of incident angle (trace rotation). If
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, nsv is taken from velocity-model.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>If the user wants to implement own forward modeling code, a new forward
+modeling class for it is needed. After normally initializing a target
+with BayHunter, an instance of the new forward modeling class must be
+initialized and passed to the <em>update_plugin</em> method of the target. If
+an additional data set is wished to be included in the inversion, i.e.,
+from a non pre-defined target class, a new target class needs to be
+implemented, additionally to the forward modeling class that handles the
+synthetic data computation. For both, the forward modeling class and the
+new target class, a template is stored on the GitHub repository. It is
+important that the classes implement specifically named methods and
+parameters to ensure the correct interface with BayHunter.</p>
+</div>
+<div class="section" id="setting-up-parameters">
+<span id="sec-parsetup"></span><h3>Setting up parameters<a class="headerlink" href="#setting-up-parameters" title="Permalink to this headline">¶</a></h3>
+<p>Each chain will be initialized with the targets and with parameter
+dictionaries. The model priors and inversion parameters that need to be
+defined are listed with default values in <a class="reference internal" href="#tab-invpars"><span class="std std-numref">Table 2</span></a>,
+and are explained below in detail.</p>
+<div class="docutils container" id="tab-invpars">
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-number">Table 2 </span><span class="caption-text">Default model priors and inversion parameters (SI-units, i.e., km, km/s, %). Model prior tuples define the limits (min, max) of a uniform distribution. <code class="docutils literal notranslate"><span class="pre">None</span></code> implies that the constraint is not used. Abbreviations and constraints are explained in the text.</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 35%" />
+<col style="width: 18%" />
+<col style="width: 23%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>vs</p></td>
+<td><p>= (1, 5)</p></td>
+<td><p>nchains</p></td>
+<td><p>= 3</p></td>
+</tr>
+<tr class="row-even"><td><p>z</p></td>
+<td><p>= (0, 60)</p></td>
+<td><p><span class="math notranslate nohighlight">\(i
+ter_
+{burnin}\)</span></p></td>
+<td><p>= 4096</p></td>
+</tr>
+<tr class="row-odd"><td><p>layers</p></td>
+<td><p>= (1, 20)</p></td>
+<td><p><span class="math notranslate nohighlight">\(i
+te
+r_{main}\)</span></p></td>
+<td><p>= 2048</p></td>
+</tr>
+<tr class="row-even"><td><p>vpvs</p></td>
+<td><p>= (1.5, 2.1)</p></td>
+<td><p>acceptance</p></td>
+<td><p>= (40,
+45)</p></td>
+</tr>
+<tr class="row-odd"><td><p>mantle
+<span class="math notranslate nohighlight">\(^1\)</span></p>
+<p>mohoest
+<span class="math notranslate nohighlight">\(^2\)</span></p>
+</td>
+<td><p>= <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<p>= <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</td>
+<td><p>propdist
+<span class="math notranslate nohighlight">\(^3\)</span></p></td>
+<td><p>= (0.015,
+0.015, 0.005,
+0.015, 0.005)</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(r_
+{RF}\)</span></p></td>
+<td><p>= (0.35, 0.75)</p></td>
+<td><p>thickmin</p></td>
+<td><p>= 0.</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\sigma
+_{RF}\)</span></p></td>
+<td><p>= (1e-5, 0.05)</p></td>
+<td><p>lvz</p></td>
+<td><p>= <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(r_
+{SWD}\)</span></p></td>
+<td><p>= 0.</p></td>
+<td><p>hvz</p></td>
+<td><p>= <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(\sigma
+_{SWD}\)</span></p></td>
+<td><p>= (1e-5, 0.1)</p></td>
+<td><p>rcond</p></td>
+<td><p>= <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+</tr>
+<tr class="row-even"><td colspan="2"><p><span class="math notranslate nohighlight">\(^1\)</span> i.e., (vs<span class="math notranslate nohighlight">\(_m\)</span>,
+vpvs<span class="math notranslate nohighlight">\(_m\)</span>), e.g., (4.2, 1.8)</p></td>
+<td><p>station</p></td>
+<td><p>= ’test’</p></td>
+</tr>
+<tr class="row-odd"><td colspan="2"><p><span class="math notranslate nohighlight">\(^2\)</span> i.e., (z<span class="math notranslate nohighlight">\(_{mean}\)</span>,
+z<span class="math notranslate nohighlight">\(_{std}\)</span>), e.g., (40, 4)</p></td>
+<td><p>savepath</p></td>
+<td><p>= ’results/’</p></td>
+</tr>
+<tr class="row-even"><td colspan="2"><p><span class="math notranslate nohighlight">\(^3\)</span> i.e.,
+(vs, z<span class="math notranslate nohighlight">\(_{move}\)</span>,
+vs<span class="math notranslate nohighlight">\(_{birth/death}\)</span>,
+noise, vpvs)</p></td>
+<td><p>maxmodels</p></td>
+<td><p>= 50 000</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The priors for the velocity-depth structure include <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>
+and depth, the number of layers, and average crustal
+<span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>. The ranges as given in
+<a class="reference internal" href="#tab-invpars"><span class="std std-numref">Table 2</span></a> indicate the bounds of uniform distributions.
+<span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> can also be given as a float
+digit (e.g., 1.73), indicating a constant value during the inversion.
+The parameter <span class="math notranslate nohighlight">\(layers\)</span> does not include the underlying half space,
+which is always added to the model. A mantle condition (vs<span class="math notranslate nohighlight">\(_m\)</span>,
+vpvs<span class="math notranslate nohighlight">\(_m\)</span>), i.e., a vs<span class="math notranslate nohighlight">\(_m\)</span> threshold beyond which
+<span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span> is computed from vpvs<span class="math notranslate nohighlight">\(_m\)</span>, can be chosen if
+appropriate. There is also the option to give a single interface depth
+estimate through <span class="math notranslate nohighlight">\(mohoest\)</span>. It can be any interface, but the
+initial idea behind was to give a Moho estimate. As explained in <a class="reference internal" href="algorithm.html#sec-inmod"><span class="std std-ref">Initialize a model</span></a>, this should only be
+considered for testing purposes. Each noise scaling parameter
+(<span class="math notranslate nohighlight">\(r\)</span>, <span class="math notranslate nohighlight">\(\sigma\)</span>) can be given by a range or a digit,
+corresponding to the bounds of a uniform distribution (the parameter is
+inverted for) or a constant value (unaltered during the inversion),
+repectively.</p>
+<p>For surface waves, the exponential correlation law
+(Eq. <a class="reference internal" href="algorithm.html#equation-exp">(3)</a>) is a realistic estimate of the correlation
+between data points and is automatically applied. For receiver
+functions, the assumed correlation law should be Gaussian
+(Eq. <a class="reference internal" href="algorithm.html#equation-gauss">(4)</a>), if the RFs are computed using a
+Gaussian filter, and exponential, if the RFs are computed applying an
+exponential filter. The inversion for <span class="math notranslate nohighlight">\(r_{RF}\)</span> is viable for the
+latter, however, not for the Gaussian correlation law as of
+computational reasons (see <a class="reference internal" href="algorithm.html#sec-complike"><span class="std std-ref">Computation of model likelihood</span></a>). Only if <span class="math notranslate nohighlight">\(r_{RF}\)</span> is estimated by giving a
+single digit, the Gaussian correlation law is considered. Otherwise, if
+given a range for <span class="math notranslate nohighlight">\(r_{RF}\)</span>, the exponential correlation law is
+used. Note that the estimation of <span class="math notranslate nohighlight">\(r_{RF}\)</span> using the exponential
+law during an inversion, may not lead to correct results if the input RF
+was Gaussian filtered.</p>
+<p>Nevertheless, <span class="math notranslate nohighlight">\(r_{RF}\)</span> can be estimated, as it is dependent on the
+sampling rate and the applied Gaussian filter width. However, if
+<span class="math notranslate nohighlight">\(r_{RF}\)</span> is too large (i.e., very close to 1), <span class="math notranslate nohighlight">\(R^{-1}\)</span>
+becomes instable and small eigenvalues need to be suppressed. The user
+can define the cutoff for small singular values by defining
+<span class="math notranslate nohighlight">\(rcond\)</span>. Singular values smaller than <span class="math notranslate nohighlight">\(rcond\)</span> x the largest
+singular value (both in modulus) are set to zero. <span class="math notranslate nohighlight">\(rcond\)</span> is not
+ascribed to the prior dictionary, but to the inversion parameter
+dictionary (see configuration file).</p>
+<p>The inversion parameters can be subdivided into three categories: (1)
+actual inversion parameters, (2) model constraints and (3) saving
+options. Parameters to constrain the inversion are the number of chains,
+the number of iterations for the burn-in and the main phase, the initial
+proposal distribution widths, and the acceptance rate. A large number of
+chains is preferable and assures good coverage of the solution space
+sampling, as each chain starts with a randomly drawn model only bound by
+the priors. The number of iterations should also be set high, as it can
+benefit, but not guarantee, the convergence of the chain towards the
+global likelihood maximum. The total amount of iterations is
+<span class="math notranslate nohighlight">\(iter_{total} = iter_{burnin} + iter_{main}\)</span>. We recommend to
+increase the ratio towards the iterations in the burn-in phase
+(i.e., <span class="math notranslate nohighlight">\(iter_{burnin}&gt;iter_{main}\)</span>), so a chain is more likely to
+have converged when entering the exploration phase for the posterior
+distribution.</p>
+<p>The initial proposal distributions, i.e., Gaussian distributions
+centered at zero, for model modifications, must be given as standard
+deviations according to each of the model modification methods (<a class="reference internal" href="algorithm.html#sec-propmod"><span class="std std-ref">Propose a model</span></a>). The values must be given as a vector of size five, the order representing following modifications: (1) <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>, (2) depth, (3) birth/death, (4) noise, and (5) <span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>. The first
+three distributions represent <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth model
+modifications referring to alterations of <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>(1,3)
+and z (2) of a Voronoi nucleus. There is one proposal distribution for
+both noise parameters <span class="math notranslate nohighlight">\(r\)</span> and <span class="math notranslate nohighlight">\(\sigma\)</span> (4) and one for
+<span class="math notranslate nohighlight">\(\mathrm{V_P}\)</span>/<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>(5).</p>
+<p>If the proposal distributions were constant, the percentage of accepted
+proposal models would decrease with ongoing inversion progress, i.e.,
+the acceptance rate decreases at the expense of an efficient sampling.
+To efficiently sample the parameter space, an acceptance rate of
+<span class="math notranslate nohighlight">\(\sim\)</span>40–45 % is forced for each proposal method by dynamically
+adapting the width of each proposal distribution. We implemented a
+minimum standard deviation of 0.001 for each proposal distribution.</p>
+<p>The most accepted model modifications are (1) and (2); their acceptance
+rates get easily forced to the desired percentage without even coming
+close to the defined minimum width of a proposal distribution. Birth and
+death steps, however, barely get accepted after an initial phase of high
+acceptance; if not limiting the proposal distribution width to a
+minimum, the standard deviations for (3) will get as small as
+<span class="math notranslate nohighlight">\(10^{-10}\)</span> km/s and smaller to try to keep the acceptance rate up.
+However, as discussed in <a class="reference internal" href="algorithm.html#sec-propmod"><span class="std std-ref">Propose a model</span></a>,
+the distribution width does not in the first place influence the
+model-modification, but the added or removed Voronoi nucleus. Models
+modified by birth and death steps will naturally not be accepted very
+often and even less the further the inversion progresses. Therefore, the
+overall acceptance rate is stuck with a specific level below the forced
+rate. An estimate of the actual overall acceptance rate can be made,
+assuming a realistic acceptance for the birth and death steps, e.g.,
+1 %. A user given target rate of 40 % for each method would give an
+actual overall acceptance rate of <span class="math notranslate nohighlight">\(\sim\)</span>3 %.
+(<span class="math notranslate nohighlight">\(\rightarrow\)</span> 6 methods, 4 reach 40 %, 2 only 1 % = 30 % over
+all.) The target acceptance rate must be given as an interval.</p>
+<p>There are three additional conditions, which might be worthwhile to use
+to constrain the velocity-depth model. However, using any of them could
+bias the posterior distribution. The user is allowed to set a minimum
+thickness of layers. Furthermore low and high velocity zones can be
+suppressed. If not <code class="docutils literal notranslate"><span class="pre">None</span></code>, the value for <span class="math notranslate nohighlight">\(lvz\)</span> (or <span class="math notranslate nohighlight">\(hvz\)</span>)
+indicates the percentage of allowed <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> decrease (or
+increase) from each layer of a model relative to the underlying layer.
+For instance, if <span class="math notranslate nohighlight">\(lvz\)</span>=0.1, then a drop of <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>
+by 10 %, but not more, to the underlying layer is allowed. As
+<span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span> naturally increases with depth, and the algorithm
+only compares each layer with the layer underneath, the <span class="math notranslate nohighlight">\(hvz\)</span>
+criteria should only be used if observing extreme high velocity zones in
+the output. Otherwise sharp (but real) discontinuities could be smoothed
+out, if chosen too small. The <span class="math notranslate nohighlight">\(lvz\)</span> and <span class="math notranslate nohighlight">\(hvz\)</span> criteria will
+be checked every time a velocity-depth model is proposed and the model
+will be rejected if the constraints are not fulfilled.</p>
+<p>The saving parameters include the <span class="math notranslate nohighlight">\(station\)</span>, <span class="math notranslate nohighlight">\(savepath\)</span> and
+<span class="math notranslate nohighlight">\(maxmodels\)</span>. The <span class="math notranslate nohighlight">\(station\)</span> name is optional and is only used
+as a reference for the user, for the automatically saved configuration
+file after initiation of an inversion. <span class="math notranslate nohighlight">\(savepath\)</span> represents the
+path where all the result files will be stored. A subfolder <em>data</em> will
+contain the configuration file and all the <em>SingleChain</em> output files,
+the combined posterior distribution files and an outlier information
+file. <span class="math notranslate nohighlight">\(savepath\)</span> also serves as figure directory.
+<span class="math notranslate nohighlight">\(maxmodels\)</span> is the number of p2-models that will be stored from
+each chain.</p>
+</div>
+<div class="section" id="running-an-inversion">
+<h3>Running an inversion<a class="headerlink" href="#running-an-inversion" title="Permalink to this headline">¶</a></h3>
+<p>The inversion will start through the <em>optimizer.mp_inversion</em> command
+with the option to chose the number of threads, <span class="math notranslate nohighlight">\(nthreads\)</span>, for
+parallel computing. By default, <span class="math notranslate nohighlight">\(nthreads\)</span> is equal to the number
+of CPUs of the user’s PC. One thread is occupied if using BayWatch.
+Ideally, one chain is working on one thread. If fully exhausting the
+capacity of a 8 CPUs PC, give <span class="math notranslate nohighlight">\(nthreads\)</span>=8 and
+<span class="math notranslate nohighlight">\(nchains\)</span>=multiple of <span class="math notranslate nohighlight">\(nthreads\)</span> or (<span class="math notranslate nohighlight">\(nthreads\)</span>-1)
+if using BayWatch. This would cause <span class="math notranslate nohighlight">\(nthreads\)</span>(-1) chains to run
+parallel at all times, until <span class="math notranslate nohighlight">\(nchains\)</span> are worked off.</p>
+<p>The speed of the inversion will not increase by choosing a larger
+<span class="math notranslate nohighlight">\(nthreads\)</span>. In fact, the speed is determined by the number of
+CPUs. If, for instance, the user doubles <span class="math notranslate nohighlight">\(nthreads\)</span>, the number of
+chains running parallel at once is also double, but the chains queue for
+some non-threadable computations blocking one CPU at a time, so each
+chain runs half the speed. To decrease <span class="math notranslate nohighlight">\(nthreads\)</span> offers a
+possibility to minimize the workload for a PC and that it is still
+accessible for other tasks during an inversion.</p>
+<p>Although having access to a cluster, inversions were also performed on a
+single work station to determine the duration of an inversion with
+standard PC equipment (e.g., Memory: 16 GB, Processor model: 3.60 GHz x
+8 cores). The runtime is not only dependent on the PC model, but also on
+the number of chains and iterations, and the number of layers of the
+actual velocity-depth structures, which directly influences the
+computational time of the forward modeling. The inversion for the
+example given in <a class="reference internal" href="#sec-testdata"><span class="std std-ref">Testing with synthetic data</span></a> with 21 chains,
+150,000 iterations and models with 3–10 layers, took 20.4 minutes; so
+each batch of 7 chains took 7 minutes.</p>
+<p>Another argument to set when starting an inversion is <span class="math notranslate nohighlight">\(baywatch\)</span>.
+If set to True, model data will be send out with an interval of
+<span class="math notranslate nohighlight">\(dtsend\)</span>=0.5 s and can be received by BayWatch until the
+inversion has finished.</p>
+</div>
+</div>
+<div class="section" id="testing-with-synthetic-data">
+<span id="sec-testdata"></span><h2>Testing with synthetic data<a class="headerlink" href="#testing-with-synthetic-data" title="Permalink to this headline">¶</a></h2>
+<p>A set of test data was computed with the <em>BayHunter.SynthObs</em> module,
+which provides methods for computing receiver functions (P, S), surface
+wave dispersion curves (Love, Rayleigh, phase, group), and synthetic
+noise following the exponential or the Gaussian correlation law. We
+computed the P-RF and the fundamental mode SWD of the Rayleigh wave
+phase velocity from a six-layer model including a low velocity zone. We
+computed non-correlated noise for SWD and Gaussian correlated noise for
+the RF with values for <span class="math notranslate nohighlight">\(r\)</span> and <span class="math notranslate nohighlight">\(\sigma\)</span> as given in <a class="reference internal" href="#tab-testpars"><span class="std std-numref">Table 3</span></a> (<em>true</em>). Noise and synthetic data were then
+added to create observed data. An example script, including these steps,
+can be found in the <a class="reference internal" href="appendix.html"><span class="doc">Appendix</span></a> and the online repository.</p>
+<div class="docutils container" id="tab-testpars">
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-number">Table 3 </span><span class="caption-text">Model priors and inversion parameters for synthetic test inversion and <em>true</em> values used for modeling of the observed data. Model prior tuples define the limits (min, max) of a uniform distribution.</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 28%" />
+<col style="width: 23%" />
+<col style="width: 23%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>vs</p></td>
+<td><p>= (2, 5)</p></td>
+<td><p>nchains</p></td>
+<td><p>= 21</p></td>
+</tr>
+<tr class="row-even"><td><p>z</p></td>
+<td><p>= (0, 60)</p></td>
+<td><p><span class="math notranslate nohighlight">\(i
+ter_{burnin}\)</span></p></td>
+<td><p>= 100,000</p></td>
+</tr>
+<tr class="row-odd"><td><p>layers</p></td>
+<td><p>= (1, 20)</p></td>
+<td><p><span class="math notranslate nohighlight">\(i
+ter_{main}\)</span></p></td>
+<td><p>= 50,000</p></td>
+</tr>
+<tr class="row-even"><td><p>vpvs</p></td>
+<td><p>= (1.5, 2.1)</p></td>
+<td><p>acceptance</p></td>
+<td><p>= (50, 55)</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(r_{RF}\)</span></p></td>
+<td><p>= 0.92</p></td>
+<td><p>propdist</p></td>
+<td><p>= (0.005,
+0.005, 0.005,
+0.005, 0.005)</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\sigma_
+{RF}\)</span></p></td>
+<td><p>= (1e-5,
+0.05)</p></td>
+<td><p>rcond</p></td>
+<td><p>= 1e-6</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(r_{SWD}\)</span></p></td>
+<td><p>= 0.</p></td>
+<td><p>station</p></td>
+<td><p>= ’st6’</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(\sigma_
+{SWD}\)</span></p></td>
+<td><p>= (1e-5, 0.1)</p></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Two targets (<em>PReceiverFunction</em>, <em>RayleighDispersionPhase</em>) were
+initialized with the “observed” data and combined to a
+<em>BayHunter.JointTarget</em> object. The latter and the two parameter
+dictionaries of model priors and inversion parameters
+(<a class="reference internal" href="#tab-testpars"><span class="std std-numref">Table 3</span></a>) were passed to the Optimizer. Parameters
+that were not defined fall back to the default values. We purposely show
+a run with only 150,000 iterations to visualize the convergence of
+different chains and the outlier detection method. The inversion
+finished after 20 minutes, saving and plotting methods were applied
+afterwards.</p>
+<div class="figure align-default" id="id4">
+<span id="fig-bh-iiter"></span><img alt="_images/c_iiter_likes_example.png" src="_images/c_iiter_likes_example.png" />
+<p class="caption"><span class="caption-number">Fig. 5 </span><span class="caption-text">Development of likelihood over iteration for all 21 chains (top) and a small selection of chains (bottom).</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+<p><a class="reference internal" href="#fig-bh-iiter"><span class="std std-numref">Figure 5</span></a> shows the likelihood
+development over the iterations for all and for a selection of chains. A
+strong increase of likelihood can be observed at the first iterations in
+the burn-in phase, converging towards a stable value with increasing
+number of iteration. Some chains reached the final likelihood plateau in
+the burn-in phase (e.g., <span class="math notranslate nohighlight">\(c0\)</span>), some within the posterior sampling
+phase (e.g., <span class="math notranslate nohighlight">\(c4\)</span>), and some did not converge at all (<span class="math notranslate nohighlight">\(c2\)</span>).
+The chain <span class="math notranslate nohighlight">\(c2\)</span> (also <span class="math notranslate nohighlight">\(c1\)</span> and <span class="math notranslate nohighlight">\(c3\)</span>) had a good chance
+of reaching the maximum likelihood, if the small number of iterations
+would not have stopped the exploration at this early stage. However, the
+number of iterations cannot be eternal; in any case it is necessary to
+compare the convergence level of the chains.</p>
+<p>Here, we defined a 0.02 deviation condition for outliers. With a maximum
+median posterior likelihood of 1674 (<span class="math notranslate nohighlight">\(c13\)</span>), the likelihood
+threshold is 1640, which declared 13 chains with deviations of
+0.032–0.159 as outliers (see <a class="reference internal" href="#tab-outliers"><span class="std std-numref">Table 4</span></a>). In a real
+case inversion, the number of iterations should be much higher, and the
+number of outlier chains is small. The detected outlier chains will be
+excluded from the posterior distribution.</p>
+<div class="docutils container" id="tab-outliers">
+<table class="docutils align-default" id="id5">
+<caption><span class="caption-number">Table 4 </span><span class="caption-text">Deviations of each chain’s median likelihood from the maximum median likelihood of the chain ensemble. Only outlier chains with deviations <span class="math notranslate nohighlight">\(&gt;\)</span>0.02 (2 %) are listed.</span><a class="headerlink" href="#id5" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 13%" />
+<col style="width: 5%" />
+<col style="width: 13%" />
+<col style="width: 8%" />
+<col style="width: 13%" />
+<col style="width: 8%" />
+<col style="width: 13%" />
+<col style="width: 8%" />
+<col style="width: 13%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>c1</p></td>
+<td><p>0.039</p></td>
+<td><p>c6</p></td>
+<td><p>0.061</p></td>
+<td><p>c9</p></td>
+<td><p>0.059</p></td>
+<td><p>c15</p></td>
+<td><p>0.150</p></td>
+<td><p>c19</p></td>
+<td><p>0.059</p></td>
+</tr>
+<tr class="row-even"><td><p>c2</p></td>
+<td><p>0.111</p></td>
+<td><p>c7</p></td>
+<td><p>0.033</p></td>
+<td><p>c10</p></td>
+<td><p>0.150</p></td>
+<td><p>c16</p></td>
+<td><p>0.033</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>c5</p></td>
+<td><p>0.032</p></td>
+<td><p>c8</p></td>
+<td><p>0.109</p></td>
+<td><p>c14</p></td>
+<td><p>0.033</p></td>
+<td><p>c17</p></td>
+<td><p>0.033</p></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><a class="reference internal" href="#fig-bh-datafits"><span class="std std-numref">Figure 6</span></a> shows the current <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth models from different chains and corresponding data fits (same chains as in <a class="reference internal" href="#fig-bh-iiter"><span class="std std-numref">Figure 5</span></a>, bottom). Chains <span class="math notranslate nohighlight">\(c1\)</span> and <span class="math notranslate nohighlight">\(c2\)</span> show the worst data fits; they were declared as outliers. The
+other chains (<span class="math notranslate nohighlight">\(c0\)</span>, <span class="math notranslate nohighlight">\(c3\)</span>, <span class="math notranslate nohighlight">\(c4\)</span>) show a reasonably good
+data fit with very similar velocity models. Chains <span class="math notranslate nohighlight">\(c0\)</span> and
+<span class="math notranslate nohighlight">\(c4\)</span> already found a six-layer model, <span class="math notranslate nohighlight">\(c3\)</span> found a
+five-layer model averaging the low velocity zone.</p>
+<div class="figure align-default" id="id6">
+<span id="fig-bh-datafits"></span><img alt="_images/c_currentmodels.png" src="_images/c_currentmodels.png" />
+<p class="caption"><span class="caption-number">Fig. 6 </span><span class="caption-text">Current velocity-depth models and data fits of corresponding SWD and RF data from different chains with likelihoods as illustrated in <a class="reference internal" href="#fig-bh-iiter"><span class="std std-numref">Figure 5</span></a> (bottom). The black line (left) is the synthetic <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth structure.</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+</div>
+<p>The posterior distribution of the eight converged chains, containing 100,000 models, are illustrated in <a class="reference internal" href="#fig-bh-models"><span class="std std-numref">Figure 7</span></a>. The mean (and mode) posterior <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth structure images the true model
+very well, including the low velocity zone. The number of layers is determined to be most likely six. The <span class="math notranslate nohighlight">\(\sigma\)</span> distributions of both, RF and SWD show a Gaussian shape, inhering a tail of higher values from models of chains that only converged within the exploration phase of the inversion (e.g., <span class="math notranslate nohighlight">\(c3\)</span> and <span class="math notranslate nohighlight">\(c4\)</span>). The distribution of <span class="math notranslate nohighlight">\(\sigma_{SWD}\)</span> already represents a good estimate, slightly overestimated, which falls back to the number of iterations. Tests with more iterations show that the median of <span class="math notranslate nohighlight">\(\sigma_{SWD}\)</span> is in
+perfect agreement with the true value.</p>
+<div class="figure align-default" id="id7">
+<span id="fig-bh-models"></span><img alt="_images/c_posteriormodels.png" src="_images/c_posteriormodels.png" />
+<p class="caption"><span class="caption-number">Fig. 7 </span><span class="caption-text">Recovered posterior distributions of <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>, interface depth, number of layers, and noise level for synthetic data. Red lines indicate the true model, as given in <a class="reference internal" href="#tab-testpars"><span class="std std-numref">Table 3</span></a>. The posterior distribution is assembled by 100,000 models collected by 8 chains.</span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
+</div>
+<p><span class="math notranslate nohighlight">\(\sigma_{RF}\)</span> is underestimated, which theoretically means that
+noise was interpreted as signal and receiver function data is
+overfitted. The difference to SWD is the type of noise correlation (=
+Gaussian) and the assumption of the correlation <span class="math notranslate nohighlight">\(r\)</span> of data noise
+(<span class="math notranslate nohighlight">\(r\neq0\)</span>). We computed synthetic RF data applying a Gaussian
+lowpass filter with a Gaussian factor of 1. Separately, noise was
+generated randomly with a correlation <span class="math notranslate nohighlight">\(r\)</span> estimated to represent
+the applied Gauss filter, and added to the synthetic data. The random
+process of generating noise does not output a noise vector which exactly
+matches the given values of <span class="math notranslate nohighlight">\(r\)</span> and <span class="math notranslate nohighlight">\(\sigma\)</span>. If only
+drawing one single realization with a determined amount of samples from
+the multivariate normal distribution may produce deviations from the
+targeted <span class="math notranslate nohighlight">\(r\)</span> and <span class="math notranslate nohighlight">\(\sigma\)</span>. From the generated noise the true
+<span class="math notranslate nohighlight">\(\sigma\)</span> can be computed by the standard deviation. However, the
+true <span class="math notranslate nohighlight">\(r\)</span> is not easy to reconstruct. Assuming a wrong <span class="math notranslate nohighlight">\(r\)</span>
+for the covariance matrix of noise cannot lead to the correct
+<span class="math notranslate nohighlight">\(\sigma\)</span>.</p>
+<div class="figure align-default" id="id8">
+<span id="fig-bh-corr"></span><img alt="_images/c_covfix.png" src="_images/c_covfix.png" />
+<p class="caption"><span class="caption-number">Fig. 8 </span><span class="caption-text">Comparison of residuals of the best fitting RF model and one realization of noise through <span class="math notranslate nohighlight">\(C_e^{RF}\)</span> for receiver functions. Both noise vectors are of coherent appearance in frequency and amplitude, hence, the estimate of <span class="math notranslate nohighlight">\(r_{RF}\)</span> is appropriate.</span><a class="headerlink" href="#id8" title="Permalink to this image">¶</a></p>
+</div>
+<p>It is possible to clarify whether the assumed correlation parameter
+<span class="math notranslate nohighlight">\(r\)</span> is in tendency correct. <a class="reference internal" href="#fig-bh-corr"><span class="std std-numref">Figure 8</span></a> shows a comparison of (1) the RF data residuals of the best fitting model and (2) one realization of noise with the given correlation <span class="math notranslate nohighlight">\(r\)</span> and the estimated
+<span class="math notranslate nohighlight">\(\sigma_{RF}\)</span>; both noise vectors should be of coherent appearance
+in frequency and amplitude, if the estimate of <span class="math notranslate nohighlight">\(r_{RF}\)</span> is
+appropriate.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2020, Jennifer Dreiling.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/tutorial.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

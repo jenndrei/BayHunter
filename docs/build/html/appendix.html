@@ -1,0 +1,193 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Appendix &#8212; BayHunter  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="References" href="references.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">BayHunter</a></h1>
+
+
+
+<p class="blurb">McMC trans-D Bayesian inversion of SWD and RF</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jenndrei&repo=BayHunter&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithm.html">Algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Appendix</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#inversion-example">Inversion example</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="references.html" title="previous chapter">References</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="appendix">
+<h1>Appendix<a class="headerlink" href="#appendix" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="inversion-example">
+<h2>Inversion example<a class="headerlink" href="#inversion-example" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="k">as</span> <span class="nn">op</span>
+<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="kn">import</span> <span class="n">SynthObs</span>
+<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="kn">import</span> <span class="n">Targets</span>
+<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="kn">import</span> <span class="n">MCMC_Optimizer</span>
+<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="kn">import</span> <span class="n">PlotFromStorage</span>
+
+<span class="c1"># ---------------------------------------------------- obs SYNTH DATA</span>
+<span class="c1"># Load observed data (synthetic test data)</span>
+<span class="n">xsw</span><span class="p">,</span> <span class="n">_ysw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;rdispph.dat&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">xrf</span><span class="p">,</span> <span class="n">_yrf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;prf.dat&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+<span class="c1"># Create noise and add to synthetic data</span>
+<span class="n">ysw</span> <span class="o">=</span> <span class="n">_ysw</span> <span class="o">+</span> <span class="n">SynthObs</span><span class="o">.</span><span class="n">compute_expnoise</span><span class="p">(</span><span class="n">_ysw</span><span class="p">,</span> <span class="n">corr</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.012</span><span class="p">)</span>
+<span class="n">yrf</span> <span class="o">=</span> <span class="n">_yrf</span> <span class="o">+</span> <span class="n">SynthObs</span><span class="o">.</span><span class="n">compute_gaussnoise</span><span class="p">(</span><span class="n">_yrf</span><span class="p">,</span> <span class="n">corr</span><span class="o">=</span><span class="mf">0.92</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.005</span><span class="p">)</span>
+
+<span class="c1">#  ---------------------------------------------------------- TARGETS</span>
+<span class="c1"># Assign data to target classes</span>
+<span class="n">target1</span> <span class="o">=</span> <span class="n">Targets</span><span class="o">.</span><span class="n">RayleighDispersionPhase</span><span class="p">(</span><span class="n">xsw</span><span class="p">,</span> <span class="n">ysw</span><span class="p">)</span>
+<span class="n">target2</span> <span class="o">=</span> <span class="n">Targets</span><span class="o">.</span><span class="n">PReceiverFunction</span><span class="p">(</span><span class="n">xrf</span><span class="p">,</span> <span class="n">yrf</span><span class="p">)</span>
+<span class="n">target2</span><span class="o">.</span><span class="n">moddata</span><span class="o">.</span><span class="n">plugin</span><span class="o">.</span><span class="n">set_modelparams</span><span class="p">(</span><span class="n">gauss</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">water</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">6.4</span><span class="p">)</span>
+
+<span class="c1"># Join the targets</span>
+<span class="n">targets</span> <span class="o">=</span> <span class="n">Targets</span><span class="o">.</span><span class="n">JointTarget</span><span class="p">(</span><span class="n">targets</span><span class="o">=</span><span class="p">[</span><span class="n">target1</span><span class="p">,</span> <span class="n">target2</span><span class="p">])</span>
+
+<span class="c1">#  ------------------------------------------------------- PARAMETERS</span>
+<span class="c1"># Define parameters as dictionaries ...</span>
+<span class="n">priors</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;vs&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+          <span class="s1">&#39;layers&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+          <span class="s1">&#39;vpvs&#39;</span><span class="p">:</span> <span class="mf">1.73</span><span class="p">,</span>
+           <span class="s1">&#39;rfnoise_corr&#39;</span><span class="p">:</span> <span class="mf">0.92</span><span class="p">,</span>
+           <span class="o">...</span>
+          <span class="p">}</span>
+
+<span class="n">initparams</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nchains&#39;</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span>
+       <span class="s1">&#39;iter_burnin&#39;</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span>
+       <span class="s1">&#39;iter_main&#39;</span><span class="p">:</span> <span class="mi">50000</span><span class="p">,</span>
+       <span class="o">...</span>
+              <span class="p">}</span>
+
+<span class="c1"># ... or load from file</span>
+<span class="n">initfile</span> <span class="o">=</span> <span class="s1">&#39;config.ini&#39;</span>
+<span class="n">priors</span><span class="p">,</span> <span class="n">initparams</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">load_params</span><span class="p">(</span><span class="n">initfile</span><span class="p">)</span>
+
+<span class="c1">#  --------------------------------------------------- MCMC INVERSION</span>
+<span class="c1"># Save configfile for baywatch</span>
+<span class="n">utils</span><span class="o">.</span><span class="n">save_baywatch_config</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">priors</span><span class="o">=</span><span class="n">priors</span><span class="p">,</span> <span class="n">initparams</span><span class="o">=</span><span class="n">initparams</span><span class="p">)</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">MCMC_Optimizer</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">initparams</span><span class="o">=</span><span class="n">initparams</span><span class="p">,</span> <span class="n">priors</span><span class="o">=</span><span class="n">priors</span><span class="p">,</span>
+                           <span class="n">random_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="c1"># start inversion, activate BayWatch</span>
+<span class="n">optimizer</span><span class="o">.</span><span class="n">mp_inversion</span><span class="p">(</span><span class="n">nthreads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">baywatch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtsend</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1">#  ------------------------------------------------ SAVING / PLOTTING</span>
+<span class="c1"># Initiate plotting object</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">initparams</span><span class="p">[</span><span class="s1">&#39;savepath&#39;</span><span class="p">]</span>
+<span class="n">cfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_config.pkl&#39;</span> <span class="o">%</span> <span class="n">initparams</span><span class="p">[</span><span class="s1">&#39;station&#39;</span><span class="p">]</span>
+<span class="n">configfile</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">cfile</span><span class="p">)</span>
+<span class="n">obj</span> <span class="o">=</span> <span class="n">PlotFromStorage</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
+
+<span class="c1"># Save posterior distribution to combined files, incl. outlier detection</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">save_final_distribution</span><span class="p">(</span><span class="n">maxmodels</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">dev</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+
+<span class="c1"># Save a selection of important plots</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">save_plots</span><span class="p">()</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">merge_pdfs</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2020, Jennifer Dreiling.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/appendix.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
