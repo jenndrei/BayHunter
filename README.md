@@ -65,8 +65,8 @@ The file to be run, `tutorialhunt.py`, is spiked with comments.
 You can also create your own synthetic data set with `create_testdata.py`.
 
 
-### References
+### Resources
 
-* SWD forward modeling is based on SURF96 from [CPS](http://www.eas.slu.edu/eqc/eqccps.html), Herrmann and Ammon, 2002. BayHunter uses a Python wrapper using [pysurf96](https://github.com/miili/pysurf96) and [SurfTomo](https://github.com/caiweicaiwei/SurfTomo).
-* RF forward modeling using **rfmini** from Joachim Saul, GFZ.
-* Most influence offered the work from [Bodin et al., 2012](https://doi.org/10.1029/2011JB008560).
+* Algorithm: based on the work of [Bodin et al., 2012](https://doi.org/10.1029/2011JB008560).
+* SWD forward modeling: SURF96 from Computer Programs of Seismology ([CPS](http://www.eas.slu.edu/eqc/eqccps.html)). Python wrapper using [pysurf96](https://github.com/miili/pysurf96) and [SurfTomo](https://github.com/caiweicaiwei/SurfTomo).
+* RF forward modeling: **rfmini** from [Joachim Saul, GFZ](https://www.gfz-potsdam.de/en/staff/joachim-saul/).
