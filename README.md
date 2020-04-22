@@ -58,7 +58,7 @@ sudo python setup.py install
 
 ### Documentation and Tutorial
 
-The [documentation](https://github.com/jenndrei/BayHunter/raw/master/docs/BayHunter_v2.0_documentation.pdf) to BayHunter offers background information to the inversion algorithm, the parameters and usage of BayHunter and BayWatch (tutorial).
+The documentation to BayHunter offers background information on the inversion algorithm, the parameters and usage of BayHunter and BayWatch (tutorial). See the [documentation here](https://jenndrei.github.io/BayHunter/) or download the [PDF](https://github.com/jenndrei/BayHunter/blob/master/documentation/BayHunter_v2.0_documentation.pdf).
 
 An example inversion can be found in the **tutorial folder**.
 The file to be run, `tutorialhunt.py`, is spiked with comments.
@@ -68,5 +68,5 @@ You can also create your own synthetic data set with `create_testdata.py`.
 ### Resources
 
 * Algorithm: based on the work of [Bodin et al., 2012](https://doi.org/10.1029/2011JB008560).
-* SWD forward modeling: SURF96 from Computer Programs of Seismology ([CPS](http://www.eas.slu.edu/eqc/eqccps.html)). Python wrapper using [pysurf96](https://github.com/miili/pysurf96) and [SurfTomo](https://github.com/caiweicaiwei/SurfTomo).
+* SWD forward modeling: SURF96 from Computer Programs in Seismology ([CPS](http://www.eas.slu.edu/eqc/eqccps.html)). Python wrapper using [pysurf96](https://github.com/miili/pysurf96) and [SurfTomo](https://github.com/caiweicaiwei/SurfTomo).
 * RF forward modeling: **rfmini** from [Joachim Saul, GFZ](https://www.gfz-potsdam.de/en/staff/joachim-saul/).

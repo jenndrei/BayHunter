@@ -8,8 +8,8 @@ Tutorial
 
 This chapter contains the installation instructions of BayHunter,
 followed by an example of how to set up and run an inversion. A
-minimalistic working example is shown in the :doc:`Appendix <appendix>`. Furthermore, results from an inversion using synthetic data are shown and discussed. Be here also referred to the `full tutorial <https://github.com/jenndrei/BayHunter/tutorial>`_ including data files.
-   
+minimalistic working example is shown in the :doc:`Appendix <appendix>`. Furthermore, results from an inversion using synthetic data are shown and discussed. Be here also referred to the `full tutorial <https://github.com/jenndrei/BayHunter/tree/master/tutorial>`_ including data files.
+
 
 Requirements and installation
 -----------------------------
