@@ -42,13 +42,13 @@ initfile = 'config.ini'
 priors, initparams = utils.load_params(initfile)
 
 # Load observed data (synthetic test data)
-xsw, _ysw = np.loadtxt('observed/st3_rdispph.dat', usecols=[0, 1]).T
-xrf, _yrf = np.loadtxt('observed/st3_prf.dat', usecols=[0, 1]).T
+xsw, _ysw = np.loadtxt('observed/st3_rdispph.dat').T
+xrf, _yrf = np.loadtxt('observed/st3_prf.dat').T
 
 # add noise to create observed data
 # order of noise values (correlation, amplitude):
 # noise = [corr1, sigma1, corr2, sigma2] for 2 targets
-noise = [0.0, 0.012, 0.90, 0.005]
+noise = [0.0, 0.012, 0.98, 0.005]
 ysw_err = SynthObs.compute_expnoise(_ysw, corr=noise[0], sigma=noise[1])
 ysw = _ysw + ysw_err
 yrf_err = SynthObs.compute_gaussnoise(_yrf, corr=noise[2], sigma=noise[3])
@@ -107,7 +107,7 @@ targets = Targets.JointTarget(targets=[target1, target2])
 # See docs/bayhunter.pdf for explanation of parameters
 
 priors.update({'mohoest': (38, 4),  # optional, moho estimate (mean, std)
-               'rfnoise_corr': 0.9,
+               'rfnoise_corr': 0.98,
                'swdnoise_corr': 0.
                # 'rfnoise_sigma': np.std(yrf_err),  # fixed to true value
                # 'swdnoise_sigma': np.std(ysw_err),  # fixed to true value

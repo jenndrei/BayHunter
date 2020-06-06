@@ -216,8 +216,3 @@ class SynthObs():
             logL += logL_target
 
         return logL
-
-    @staticmethod
-    def estimate_corr(rfdata, corrs=None):
-        if corrs is None:
-            corrs = np.arange(0, 1, 0.1)

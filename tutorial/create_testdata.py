@@ -25,7 +25,7 @@ swdata = SynthObs.return_swddata(h, vs, vpvs=vpvs, x=sw_x)
 SynthObs.save_data(swdata, outfile=datafile)
 
 # receiver functions
-pars={'p': 6.4}
+pars = {'p': 6.4}
 datafile = op.join(path, 'st%d_%s.dat' % (idx, '%s'))
 rfdata = SynthObs.return_rfdata(h, vs, vpvs=vpvs, x=None)
 SynthObs.save_data(rfdata, outfile=datafile)

@@ -15,6 +15,7 @@
     <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="FAQs" href="FAQs.html" />
     <link rel="prev" title="References" href="references.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -53,8 +54,10 @@
 <li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Appendix</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#inversion-example">Inversion example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#estimation-of-r-rf">Estimation of <span class="math notranslate nohighlight">\(r_{RF}\)</span></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="FAQs.html">FAQs</a></li>
 </ul>
 
 <div class="relations">
@@ -62,6 +65,7 @@
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="references.html" title="previous chapter">References</a></li>
+      <li>Next: <a href="FAQs.html" title="next chapter">FAQs</a></li>
   </ul></li>
 </ul>
 </div>
@@ -97,22 +101,22 @@
 <h2>Inversion example<a class="headerlink" href="#inversion-example" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os.path</span> <span class="k">as</span> <span class="nn">op</span>
-<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="kn">import</span> <span class="n">utils</span>
-<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="kn">import</span> <span class="n">SynthObs</span>
-<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="kn">import</span> <span class="n">Targets</span>
-<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="kn">import</span> <span class="n">MCMC_Optimizer</span>
-<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="kn">import</span> <span class="n">PlotFromStorage</span>
+<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="k">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="k">import</span> <span class="n">SynthObs</span>
+<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="k">import</span> <span class="n">Targets</span>
+<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="k">import</span> <span class="n">MCMC_Optimizer</span>
+<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="k">import</span> <span class="n">PlotFromStorage</span>
 
-<span class="c1"># ---------------------------------------------------- obs SYNTH DATA</span>
+<span class="c1"># --------------------------------------------------- obs SYNTH DATA</span>
 <span class="c1"># Load observed data (synthetic test data)</span>
 <span class="n">xsw</span><span class="p">,</span> <span class="n">_ysw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;rdispph.dat&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 <span class="n">xrf</span><span class="p">,</span> <span class="n">_yrf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;prf.dat&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
 <span class="c1"># Create noise and add to synthetic data</span>
 <span class="n">ysw</span> <span class="o">=</span> <span class="n">_ysw</span> <span class="o">+</span> <span class="n">SynthObs</span><span class="o">.</span><span class="n">compute_expnoise</span><span class="p">(</span><span class="n">_ysw</span><span class="p">,</span> <span class="n">corr</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.012</span><span class="p">)</span>
-<span class="n">yrf</span> <span class="o">=</span> <span class="n">_yrf</span> <span class="o">+</span> <span class="n">SynthObs</span><span class="o">.</span><span class="n">compute_gaussnoise</span><span class="p">(</span><span class="n">_yrf</span><span class="p">,</span> <span class="n">corr</span><span class="o">=</span><span class="mf">0.92</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.005</span><span class="p">)</span>
+<span class="n">yrf</span> <span class="o">=</span> <span class="n">_yrf</span> <span class="o">+</span> <span class="n">SynthObs</span><span class="o">.</span><span class="n">compute_gaussnoise</span><span class="p">(</span><span class="n">_yrf</span><span class="p">,</span> <span class="n">corr</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.005</span><span class="p">)</span>
 
-<span class="c1">#  ---------------------------------------------------------- TARGETS</span>
+<span class="c1">#  --------------------------------------------------------- TARGETS</span>
 <span class="c1"># Assign data to target classes</span>
 <span class="n">target1</span> <span class="o">=</span> <span class="n">Targets</span><span class="o">.</span><span class="n">RayleighDispersionPhase</span><span class="p">(</span><span class="n">xsw</span><span class="p">,</span> <span class="n">ysw</span><span class="p">)</span>
 <span class="n">target2</span> <span class="o">=</span> <span class="n">Targets</span><span class="o">.</span><span class="n">PReceiverFunction</span><span class="p">(</span><span class="n">xrf</span><span class="p">,</span> <span class="n">yrf</span><span class="p">)</span>
@@ -121,26 +125,26 @@
 <span class="c1"># Join the targets</span>
 <span class="n">targets</span> <span class="o">=</span> <span class="n">Targets</span><span class="o">.</span><span class="n">JointTarget</span><span class="p">(</span><span class="n">targets</span><span class="o">=</span><span class="p">[</span><span class="n">target1</span><span class="p">,</span> <span class="n">target2</span><span class="p">])</span>
 
-<span class="c1">#  ------------------------------------------------------- PARAMETERS</span>
+<span class="c1">#  ------------------------------------------------------ PARAMETERS</span>
 <span class="c1"># Define parameters as dictionaries ...</span>
 <span class="n">priors</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;vs&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
           <span class="s1">&#39;layers&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
           <span class="s1">&#39;vpvs&#39;</span><span class="p">:</span> <span class="mf">1.73</span><span class="p">,</span>
-           <span class="s1">&#39;rfnoise_corr&#39;</span><span class="p">:</span> <span class="mf">0.92</span><span class="p">,</span>
+          <span class="s1">&#39;rfnoise_corr&#39;</span><span class="p">:</span> <span class="mf">0.98</span><span class="p">,</span>
            <span class="o">...</span>
           <span class="p">}</span>
 
 <span class="n">initparams</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nchains&#39;</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span>
-       <span class="s1">&#39;iter_burnin&#39;</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span>
-       <span class="s1">&#39;iter_main&#39;</span><span class="p">:</span> <span class="mi">50000</span><span class="p">,</span>
-       <span class="o">...</span>
+              <span class="s1">&#39;iter_burnin&#39;</span><span class="p">:</span> <span class="mi">100000</span><span class="p">,</span>
+              <span class="s1">&#39;iter_main&#39;</span><span class="p">:</span> <span class="mi">50000</span><span class="p">,</span>
+               <span class="o">...</span>
               <span class="p">}</span>
 
 <span class="c1"># ... or load from file</span>
 <span class="n">initfile</span> <span class="o">=</span> <span class="s1">&#39;config.ini&#39;</span>
 <span class="n">priors</span><span class="p">,</span> <span class="n">initparams</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">load_params</span><span class="p">(</span><span class="n">initfile</span><span class="p">)</span>
 
-<span class="c1">#  --------------------------------------------------- MCMC INVERSION</span>
+<span class="c1">#  -------------------------------------------------- MCMC INVERSION</span>
 <span class="c1"># Save configfile for baywatch</span>
 <span class="n">utils</span><span class="o">.</span><span class="n">save_baywatch_config</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">priors</span><span class="o">=</span><span class="n">priors</span><span class="p">,</span> <span class="n">initparams</span><span class="o">=</span><span class="n">initparams</span><span class="p">)</span>
 <span class="n">optimizer</span> <span class="o">=</span> <span class="n">MCMC_Optimizer</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">initparams</span><span class="o">=</span><span class="n">initparams</span><span class="p">,</span> <span class="n">priors</span><span class="o">=</span><span class="n">priors</span><span class="p">,</span>
@@ -149,7 +153,7 @@
 <span class="c1"># start inversion, activate BayWatch</span>
 <span class="n">optimizer</span><span class="o">.</span><span class="n">mp_inversion</span><span class="p">(</span><span class="n">nthreads</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">baywatch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtsend</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-<span class="c1">#  ------------------------------------------------ SAVING / PLOTTING</span>
+<span class="c1">#  ----------------------------------------------- SAVING / PLOTTING</span>
 <span class="c1"># Initiate plotting object</span>
 <span class="n">path</span> <span class="o">=</span> <span class="n">initparams</span><span class="p">[</span><span class="s1">&#39;savepath&#39;</span><span class="p">]</span>
 <span class="n">cfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_config.pkl&#39;</span> <span class="o">%</span> <span class="n">initparams</span><span class="p">[</span><span class="s1">&#39;station&#39;</span><span class="p">]</span>
@@ -162,6 +166,51 @@
 <span class="c1"># Save a selection of important plots</span>
 <span class="n">obj</span><span class="o">.</span><span class="n">save_plots</span><span class="p">()</span>
 <span class="n">obj</span><span class="o">.</span><span class="n">merge_pdfs</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="estimation-of-r-rf">
+<h2>Estimation of <span class="math notranslate nohighlight">\(r_{RF}\)</span><a class="headerlink" href="#estimation-of-r-rf" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">BayHunter</span> <span class="k">import</span> <span class="n">utils</span>
+
+<span class="c1"># ------------------------------------------------ RF and parameters</span>
+<span class="c1"># load observed data (synthetic RF, Gauss factor a=1)</span>
+<span class="n">rfx</span><span class="p">,</span> <span class="n">rfy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;observed/st3_prf.dat&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">rfa</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># a</span>
+
+<span class="c1"># define parameters</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">draws</span> <span class="o">=</span> <span class="mi">50000</span>
+<span class="n">rrfs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.97</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">]</span>
+
+<span class="n">pars</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;rfx&#39;</span><span class="p">:</span> <span class="n">rfx</span><span class="p">,</span> <span class="s1">&#39;rfy&#39;</span><span class="p">:</span> <span class="n">rfy</span><span class="p">,</span> <span class="s1">&#39;rfa&#39;</span><span class="p">:</span> <span class="n">rfa</span><span class="p">,</span>
+        <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="n">rfa</span><span class="p">,</span> <span class="s1">&#39;dt&#39;</span><span class="p">:</span> <span class="n">dt</span><span class="p">,</span> <span class="s1">&#39;rrfs&#39;</span><span class="p">:</span> <span class="n">rrfs</span><span class="p">,</span>
+        <span class="s1">&#39;draws&#39;</span><span class="p">:</span> <span class="n">draws</span><span class="p">}</span>
+
+<span class="c1"># ------------------------------- visualize &#39;raw&#39; data and estimates</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">plot_rrf_estimate</span><span class="p">(</span><span class="n">pars</span><span class="o">=</span><span class="n">pars</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;st3_rrf_estimate.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># --------------------------- return values for costum visualization</span>
+<span class="c1"># update parameters...</span>
+<span class="n">pars</span><span class="p">[</span><span class="s1">&#39;rrfs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+<span class="n">pars</span><span class="p">[</span><span class="s1">&#39;draws&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20000</span>
+
+<span class="c1"># get rrf-values with corresponding a-values</span>
+<span class="n">rrf</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">rrf_estimate</span><span class="p">(</span><span class="n">pars</span><span class="o">=</span><span class="n">pars</span><span class="p">)</span>
+
+<span class="c1"># custom plot example</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rrf</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">rfa</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;reference&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$r_</span><span class="si">{RF}</span><span class="s1">$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Gauss factor a&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;lightgray&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;rrf-a_rel.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -178,7 +227,7 @@
       &copy;2020, Jennifer Dreiling.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

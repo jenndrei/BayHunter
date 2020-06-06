@@ -16,7 +16,7 @@ The BayWatch module can be used to live-stream the inversion while it is running
 
 > Green et al. (2020): Magmatic and sedimentary structure beneath the Klyuchevskoy Volcanic Group, Kamchatka, from ambient noise tomography. Journal of Geophysical Research: Solid Earth. [https://doi.org/10.1029/2019JB018900](https://doi.org/10.1029/2019JB018900).
 
-> Mauerberger et al (n.a.): The multifaceted Scandinavian lithosphere imaged by surface waves and ambient noise. In preparation.
+> Mauerberger et al. (n.a.): The multifaceted Scandinavian lithosphere imaged by surface waves and ambient noise. In preparation.
 
 
 ### Comments and Feedback
@@ -34,7 +34,7 @@ I am happy to share my experience with you and also if you share your thoughts w
 
 ### Who am I?
 
-I am Jennifer Dreiling. I finished my PhD studies at the German Research Center for Geosciences (GFZ) in Potsdam, Germany. BayHunter was created by me in the frame of my PhD program. [Contact me](https://www.gfz-potsdam.de/en/staff/jennifer-dreiling/).
+I am Jennifer Dreiling. I finished my PhD studies at the German Research Center for Geosciences (GFZ) in Potsdam, Germany. I created BayHunter in the frame of my PhD program. [Contact me](https://www.gfz-potsdam.de/en/staff/jennifer-dreiling/).
 
 
 

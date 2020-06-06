@@ -133,3 +133,4 @@ Resources
     tutorial
     references
     appendix
+    FAQs

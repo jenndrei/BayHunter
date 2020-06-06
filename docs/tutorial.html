@@ -58,6 +58,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 <li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQs.html">FAQs</a></li>
 </ul>
 
 <div class="relations">
@@ -327,7 +328,12 @@ used. Note that the estimation of <span class="math notranslate nohighlight">\(r
 law during an inversion, may not lead to correct results if the input RF
 was Gaussian filtered.</p>
 <p>Nevertheless, <span class="math notranslate nohighlight">\(r_{RF}\)</span> can be estimated, as it is dependent on the
-sampling rate and the applied Gaussian filter width. However, if
+sampling rate and the applied Gaussian filter width. <a class="reference internal" href="#fig-rrf-est"><span class="std std-numref">Figure 5</span></a> shows an application of the BayHunter implemented tool to estimate <span class="math notranslate nohighlight">\(r_{RF}\)</span>. You will find a minimalistic code example in the <a class="reference internal" href="appendix.html"><span class="doc">Appendix</span></a> and an executable file with plenty of comments in the tutorial folder of the repository.</p>
+<div class="figure align-default" id="id3">
+<span id="fig-rrf-est"></span><img alt="_images/st3_rrf_est.png" src="_images/st3_rrf_est.png" />
+<p class="caption"><span class="caption-number">Fig. 5 </span><span class="caption-text">Visual estimation of <span class="math notranslate nohighlight">\(r_{RF}\)</span>. Top: Synthetic receiver function from a 3-layer crustal model, applying a Gaussian low pass filter with the Gaussian factor <span class="math notranslate nohighlight">\(a\)</span> =1. Bottom: Frequency spectrum of synthetic receiver function (solid black) and Gaussian filter with <span class="math notranslate nohighlight">\(a\)</span> =1 (dashed black). Transparently colored areas correspond to the spectra of large sample draws of synthetic Gaussian correlated noise using different values of <span class="math notranslate nohighlight">\(r_{RF}\)</span>. The solid colored lines represent the Gaussian curves matching the data ‘envelope’. The legend displays corresponding <span class="math notranslate nohighlight">\(r_{RF}\)</span> and <span class="math notranslate nohighlight">\(a\)</span> values. For the given receiver function, a proper estimate of <span class="math notranslate nohighlight">\(r_{RF}\)</span> is 0.98.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<p>If
 <span class="math notranslate nohighlight">\(r_{RF}\)</span> is too large (i.e., very close to 1), <span class="math notranslate nohighlight">\(R^{-1}\)</span>
 becomes instable and small eigenvalues need to be suppressed. The user
 can define the cutoff for small singular values by defining
@@ -459,8 +465,8 @@ the RF with values for <span class="math notranslate nohighlight">\(r\)</span> a
 added to create observed data. An example script, including these steps,
 can be found in the <a class="reference internal" href="appendix.html"><span class="doc">Appendix</span></a> and the online repository.</p>
 <div class="docutils container" id="tab-testpars">
-<table class="docutils align-default" id="id3">
-<caption><span class="caption-number">Table 3 </span><span class="caption-text">Model priors and inversion parameters for synthetic test inversion and <em>true</em> values used for modeling of the observed data. Model prior tuples define the limits (min, max) of a uniform distribution.</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
+<table class="docutils align-default" id="id4">
+<caption><span class="caption-number">Table 3 </span><span class="caption-text">Model priors and inversion parameters for synthetic test inversion and <em>true</em> values used for modeling of the observed data. Model prior tuples define the limits (min, max) of a uniform distribution.</span><a class="headerlink" href="#id4" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 26%" />
 <col style="width: 28%" />
@@ -528,11 +534,11 @@ a run with only 150,000 iterations to visualize the convergence of
 different chains and the outlier detection method. The inversion
 finished after 20 minutes, saving and plotting methods were applied
 afterwards.</p>
-<div class="figure align-default" id="id4">
+<div class="figure align-default" id="id5">
 <span id="fig-bh-iiter"></span><img alt="_images/c_iiter_likes_example.png" src="_images/c_iiter_likes_example.png" />
-<p class="caption"><span class="caption-number">Fig. 5 </span><span class="caption-text">Development of likelihood over iteration for all 21 chains (top) and a small selection of chains (bottom).</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-number">Fig. 6 </span><span class="caption-text">Development of likelihood over iteration for all 21 chains (top) and a small selection of chains (bottom).</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
 </div>
-<p><a class="reference internal" href="#fig-bh-iiter"><span class="std std-numref">Figure 5</span></a> shows the likelihood
+<p><a class="reference internal" href="#fig-bh-iiter"><span class="std std-numref">Figure 6</span></a> shows the likelihood
 development over the iterations for all and for a selection of chains. A
 strong increase of likelihood can be observed at the first iterations in
 the burn-in phase, converging towards a stable value with increasing
@@ -552,8 +558,8 @@ case inversion, the number of iterations should be much higher, and the
 number of outlier chains is small. The detected outlier chains will be
 excluded from the posterior distribution.</p>
 <div class="docutils container" id="tab-outliers">
-<table class="docutils align-default" id="id5">
-<caption><span class="caption-number">Table 4 </span><span class="caption-text">Deviations of each chain’s median likelihood from the maximum median likelihood of the chain ensemble. Only outlier chains with deviations <span class="math notranslate nohighlight">\(&gt;\)</span>0.02 (2 %) are listed.</span><a class="headerlink" href="#id5" title="Permalink to this table">¶</a></caption>
+<table class="docutils align-default" id="id6">
+<caption><span class="caption-number">Table 4 </span><span class="caption-text">Deviations of each chain’s median likelihood from the maximum median likelihood of the chain ensemble. Only outlier chains with deviations <span class="math notranslate nohighlight">\(&gt;\)</span>0.02 (2 %) are listed.</span><a class="headerlink" href="#id6" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 5%" />
 <col style="width: 13%" />
@@ -603,21 +609,21 @@ excluded from the posterior distribution.</p>
 </tbody>
 </table>
 </div>
-<p><a class="reference internal" href="#fig-bh-datafits"><span class="std std-numref">Figure 6</span></a> shows the current <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth models from different chains and corresponding data fits (same chains as in <a class="reference internal" href="#fig-bh-iiter"><span class="std std-numref">Figure 5</span></a>, bottom). Chains <span class="math notranslate nohighlight">\(c1\)</span> and <span class="math notranslate nohighlight">\(c2\)</span> show the worst data fits; they were declared as outliers. The
+<p><a class="reference internal" href="#fig-bh-datafits"><span class="std std-numref">Figure 7</span></a> shows the current <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth models from different chains and corresponding data fits (same chains as in <a class="reference internal" href="#fig-bh-iiter"><span class="std std-numref">Figure 6</span></a>, bottom). Chains <span class="math notranslate nohighlight">\(c1\)</span> and <span class="math notranslate nohighlight">\(c2\)</span> show the worst data fits; they were declared as outliers. The
 other chains (<span class="math notranslate nohighlight">\(c0\)</span>, <span class="math notranslate nohighlight">\(c3\)</span>, <span class="math notranslate nohighlight">\(c4\)</span>) show a reasonably good
 data fit with very similar velocity models. Chains <span class="math notranslate nohighlight">\(c0\)</span> and
 <span class="math notranslate nohighlight">\(c4\)</span> already found a six-layer model, <span class="math notranslate nohighlight">\(c3\)</span> found a
 five-layer model averaging the low velocity zone.</p>
-<div class="figure align-default" id="id6">
+<div class="figure align-default" id="id7">
 <span id="fig-bh-datafits"></span><img alt="_images/c_currentmodels.png" src="_images/c_currentmodels.png" />
-<p class="caption"><span class="caption-number">Fig. 6 </span><span class="caption-text">Current velocity-depth models and data fits of corresponding SWD and RF data from different chains with likelihoods as illustrated in <a class="reference internal" href="#fig-bh-iiter"><span class="std std-numref">Figure 5</span></a> (bottom). The black line (left) is the synthetic <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth structure.</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-number">Fig. 7 </span><span class="caption-text">Current velocity-depth models and data fits of corresponding SWD and RF data from different chains with likelihoods as illustrated in <a class="reference internal" href="#fig-bh-iiter"><span class="std std-numref">Figure 6</span></a> (bottom). The black line (left) is the synthetic <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth structure.</span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
 </div>
-<p>The posterior distribution of the eight converged chains, containing 100,000 models, are illustrated in <a class="reference internal" href="#fig-bh-models"><span class="std std-numref">Figure 7</span></a>. The mean (and mode) posterior <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth structure images the true model
+<p>The posterior distribution of the eight converged chains, containing 100,000 models, are illustrated in <a class="reference internal" href="#fig-bh-models"><span class="std std-numref">Figure 8</span></a>. The mean (and mode) posterior <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>-depth structure images the true model
 very well, including the low velocity zone. The number of layers is determined to be most likely six. The <span class="math notranslate nohighlight">\(\sigma\)</span> distributions of both, RF and SWD show a Gaussian shape, inhering a tail of higher values from models of chains that only converged within the exploration phase of the inversion (e.g., <span class="math notranslate nohighlight">\(c3\)</span> and <span class="math notranslate nohighlight">\(c4\)</span>). The distribution of <span class="math notranslate nohighlight">\(\sigma_{SWD}\)</span> already represents a good estimate, slightly overestimated, which falls back to the number of iterations. Tests with more iterations show that the median of <span class="math notranslate nohighlight">\(\sigma_{SWD}\)</span> is in
 perfect agreement with the true value.</p>
-<div class="figure align-default" id="id7">
+<div class="figure align-default" id="id8">
 <span id="fig-bh-models"></span><img alt="_images/c_posteriormodels.png" src="_images/c_posteriormodels.png" />
-<p class="caption"><span class="caption-number">Fig. 7 </span><span class="caption-text">Recovered posterior distributions of <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>, interface depth, number of layers, and noise level for synthetic data. Red lines indicate the true model, as given in <a class="reference internal" href="#tab-testpars"><span class="std std-numref">Table 3</span></a>. The posterior distribution is assembled by 100,000 models collected by 8 chains.</span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-number">Fig. 8 </span><span class="caption-text">Recovered posterior distributions of <span class="math notranslate nohighlight">\(\mathrm{V_S}\)</span>, interface depth, number of layers, and noise level for synthetic data. Red lines indicate the true model, as given in <a class="reference internal" href="#tab-testpars"><span class="std std-numref">Table 3</span></a>. The posterior distribution is assembled by 100,000 models collected by 8 chains.</span><a class="headerlink" href="#id8" title="Permalink to this image">¶</a></p>
 </div>
 <p><span class="math notranslate nohighlight">\(\sigma_{RF}\)</span> is underestimated, which theoretically means that
 noise was interpreted as signal and receiver function data is
@@ -636,12 +642,12 @@ targeted <span class="math notranslate nohighlight">\(r\)</span> and <span class
 true <span class="math notranslate nohighlight">\(r\)</span> is not easy to reconstruct. Assuming a wrong <span class="math notranslate nohighlight">\(r\)</span>
 for the covariance matrix of noise cannot lead to the correct
 <span class="math notranslate nohighlight">\(\sigma\)</span>.</p>
-<div class="figure align-default" id="id8">
+<div class="figure align-default" id="id9">
 <span id="fig-bh-corr"></span><img alt="_images/c_covfix.png" src="_images/c_covfix.png" />
-<p class="caption"><span class="caption-number">Fig. 8 </span><span class="caption-text">Comparison of residuals of the best fitting RF model and one realization of noise through <span class="math notranslate nohighlight">\(C_e^{RF}\)</span> for receiver functions. Both noise vectors are of coherent appearance in frequency and amplitude, hence, the estimate of <span class="math notranslate nohighlight">\(r_{RF}\)</span> is appropriate.</span><a class="headerlink" href="#id8" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-number">Fig. 9 </span><span class="caption-text">Comparison of residuals of the best fitting RF model and one realization of noise through <span class="math notranslate nohighlight">\(C_e^{RF}\)</span> for receiver functions. Both noise vectors are of coherent appearance in frequency and amplitude, hence, the estimate of <span class="math notranslate nohighlight">\(r_{RF}\)</span> is appropriate.</span><a class="headerlink" href="#id9" title="Permalink to this image">¶</a></p>
 </div>
 <p>It is possible to clarify whether the assumed correlation parameter
-<span class="math notranslate nohighlight">\(r\)</span> is in tendency correct. <a class="reference internal" href="#fig-bh-corr"><span class="std std-numref">Figure 8</span></a> shows a comparison of (1) the RF data residuals of the best fitting model and (2) one realization of noise with the given correlation <span class="math notranslate nohighlight">\(r\)</span> and the estimated
+<span class="math notranslate nohighlight">\(r\)</span> is in tendency correct. <a class="reference internal" href="#fig-bh-corr"><span class="std std-numref">Figure 9</span></a> shows a comparison of (1) the RF data residuals of the best fitting model and (2) one realization of noise with the given correlation <span class="math notranslate nohighlight">\(r\)</span> and the estimated
 <span class="math notranslate nohighlight">\(\sigma_{RF}\)</span>; both noise vectors should be of coherent appearance
 in frequency and amplitude, if the estimate of <span class="math notranslate nohighlight">\(r_{RF}\)</span> is
 appropriate.</p>
@@ -659,7 +665,7 @@ appropriate.</p>
       &copy;2020, Jennifer Dreiling.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

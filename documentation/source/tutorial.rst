@@ -176,7 +176,15 @@ law during an inversion, may not lead to correct results if the input RF
 was Gaussian filtered.
 
 Nevertheless, :math:`r_{RF}` can be estimated, as it is dependent on the
-sampling rate and the applied Gaussian filter width. However, if
+sampling rate and the applied Gaussian filter width. :numref:`Figure {number} <fig:rrf_est>` shows an application of the BayHunter implemented tool to estimate :math:`r_{RF}`. You will find a minimalistic code example in the :doc:`Appendix <appendix>` and an executable file with plenty of comments in the tutorial folder of the repository.
+
+.. _fig:rrf_est:
+
+.. figure :: _static/st3_rrf_est.png
+
+	Visual estimation of :math:`r_{RF}`. Top: Synthetic receiver function from a 3-layer crustal model, applying a Gaussian low pass filter with the Gaussian factor :math:`a` =1. Bottom: Frequency spectrum of synthetic receiver function (solid black) and Gaussian filter with :math:`a` =1 (dashed black). Transparently colored areas correspond to the spectra of large sample draws of synthetic Gaussian correlated noise using different values of :math:`r_{RF}`. The solid colored lines represent the Gaussian curves matching the data 'envelope'. The legend displays corresponding :math:`r_{RF}` and :math:`a` values. For the given receiver function, a proper estimate of :math:`r_{RF}` is 0.98.
+
+If
 :math:`r_{RF}` is too large (i.e., very close to 1), :math:`R^{-1}`
 becomes instable and small eigenvalues need to be suppressed. The user
 can define the cutoff for small singular values by defining

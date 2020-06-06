@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FAQs &#8212; BayHunter  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Appendix" href="appendix.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">BayHunter</a></h1>
+
+
+
+<p class="blurb">McMC trans-D Bayesian inversion of SWD and RF</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=jenndrei&repo=BayHunter&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithm.html">Algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">FAQs</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="appendix.html" title="previous chapter">Appendix</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="faqs">
+<span id="sec-faq"></span><h1>FAQs<a class="headerlink" href="#faqs" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><strong>Is BayHunter available for Python3?</strong></p></li>
+</ul>
+<p>BayHunter will be available for Python3 soon.</p>
+<ul class="simple">
+<li><p><strong>What noise sources are represented in the noise amplitude?</strong></p></li>
+</ul>
+<p>Multiple sources of noise are included in <span class="math notranslate nohighlight">\(\sigma\)</span> and consider observational errors, processing errors and theory errors (<a class="reference internal" href="references.html"><span class="doc">Bodin et al., 2012</span></a>). Below is an overview of these sources.</p>
+<ul class="simple">
+<li><p>Observational errors from background seismic noise (micro-seisms) and instrumental noise.</p></li>
+<li><p>Processing errors introduced by parameter choices and generally unstable operations (e.g., the deconvolution for receiver functions).</p></li>
+<li><p>Theory errors from forward modeling and inversion algorithms through physical approximations of the Earth, e.g., horizontal homogeneous isotropic layers. This noise type is coherent and reproducible, and part of the signal chosen not to explain (e.g., Gaussian filtering for receiver functions with frequency band corresponding to major scale structures).</p></li>
+</ul>
+<p>These contributions are not simply additive and are all partly reflected in the noise amplitudes <span class="math notranslate nohighlight">\(\sigma_{RF}\)</span> and <span class="math notranslate nohighlight">\(\sigma_{SWD}\)</span></p>
+<ul class="simple">
+<li><p><strong>How to choose priors for the noise scaling parameters?</strong></p></li>
+</ul>
+<p><em>Noise amplitude</em> <span class="math notranslate nohighlight">\(\sigma\)</span> :</p>
+<p>The noise parameters <span class="math notranslate nohighlight">\(\sigma_{RF}\)</span> and <span class="math notranslate nohighlight">\(\sigma_{SWD}\)</span> represent the level or the amplitude of noise. The ranges should be given sufficiently wide, so for your first tests you can try something like (1e-5, 0.05) for <span class="math notranslate nohighlight">\(\sigma_{RF}\)</span> and (1e-5, 0.1) for <span class="math notranslate nohighlight">\(\sigma_{SWD}\)</span>. If a prior range was chosen too small, you will see it after the inversion, if your posterior distribution of <span class="math notranslate nohighlight">\(\sigma\)</span> has settled on a limit value. Be sure to choose the prior minimum to be larger than zero (i.e., not exactly 0).</p>
+<p>As an example: The inversions in <a class="reference internal" href="references.html"><span class="doc">Dreiling et al. (2020)</span></a> yielded <span class="math notranslate nohighlight">\(\sigma_{SWD}\)</span> between 0.0043–0.0241 km/s (median: 0.0078 km/s) and <span class="math notranslate nohighlight">\(\sigma_{RF}\)</span> between 0.0048–0.0157 (median: 0.0082).</p>
+<p><em>Noise correlation factor</em> <span class="math notranslate nohighlight">\(r\)</span> :</p>
+<p>Because RF are time series, adjacent data points show a correlation. If you computed RF using an exponential filter, you can give a range for <span class="math notranslate nohighlight">\(r_{RF}\)</span>. The standard processing routine to construct RF, however, is to apply a Gauss filter. Therefore, you cannot invert for <span class="math notranslate nohighlight">\(r_{RF}\)</span>, as this would take a tremendous amount of computation time for the inversion, but instead need to give an estimate (digit) for <span class="math notranslate nohighlight">\(r_{RF}\)</span>. As commented by <a class="reference internal" href="references.html"><span class="doc">Bodin et al. (2012)</span></a>: Using the exponential correlation law to model RF uncertainties (of Gaussian filtered RF) would erroneously assume high frequency components in the noise which have obviously been cut by the Gaussian filter.</p>
+<p>BayHunter provides a tool to estimate <span class="math notranslate nohighlight">\(r_{RF}\)</span>, as explained in the documentation (<a class="reference internal" href="tutorial.html#sec-parsetup"><span class="std std-ref">Setting up parameters</span></a>). For a code example, see the <a class="reference internal" href="appendix.html"><span class="doc">Appendix</span></a> or the tutorial folder in the repository.</p>
+<p>Since dispersion data are not time series but travel‐time measurements at different periods, you can consider the noise independent (i.e., not correlated). So for SWD you can keep the correlation <span class="math notranslate nohighlight">\(r_{SWD}\)</span> =0.</p>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2020, Jennifer Dreiling.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/FAQs.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
