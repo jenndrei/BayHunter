@@ -154,8 +154,12 @@ def save_config(targets, configfile, priors=dict(), initparams=dict()):
 
 
 def read_config(configfile):
-    with open(configfile, 'rb') as f:
-        data = pickle.load(f)
+    try:  # python2
+        with open(configfile, 'rb') as f:
+            data = pickle.load(f)
+    except:  # python3
+        with open(configfile, 'rb') as f:
+            data = pickle.load(f, encoding='latin1')
 
     return data
 

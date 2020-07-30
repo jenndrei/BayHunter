@@ -32,8 +32,8 @@ def tryexcept(func):
             output = func(*args, **kwargs)
             return output
         except Exception as e:
-            print '* %s: Plotting was not possible\nErrorMessage: %s' \
-                % (func.__name__, e)
+            print('* %s: Plotting was not possible\nErrorMessage: %s'
+                  % (func.__name__, e))
             return None
     return wrapper_tryexcept
 
@@ -54,7 +54,7 @@ class PlotFromStorage(object):
 
         self.datapath = op.dirname(configfile)
         self.figpath = self.datapath.replace('data', '')
-        print 'Current data path: %s' % self.datapath
+        print('Current data path: %s' % self.datapath)
 
         self.init_filelists()
         self.init_outlierlist()
@@ -79,9 +79,9 @@ class PlotFromStorage(object):
         outlierfile = op.join(self.datapath, 'outliers.dat')
         if op.exists(outlierfile):
             self.outliers = np.loadtxt(outlierfile, usecols=[0], dtype=int)
-            print 'Outlier chains from file: %d' % self.outliers.size
+            print('Outlier chains from file: %d' % self.outliers.size)
         else:
-            print 'Outlier chains from file: None'
+            print('Outlier chains from file: None')
             self.outliers = np.zeros(0)
 
     def init_filelists(self):
@@ -137,8 +137,8 @@ class PlotFromStorage(object):
         outscores = 1 - scores[np.where(((1-scores) > dev))]
 
         if len(outliers) > 0:
-            print 'Outlier chains found with following chainindices:\n'
-            print outliers
+            print('Outlier chains found with following chainindices:\n')
+            print(outliers)
             outlierfile = op.join(self.datapath, 'outliers.dat')
             with open(outlierfile, 'w') as f:
                 f.write('# Outlier chainindices with %.3f deviation condition\n' % dev)
@@ -172,11 +172,11 @@ class PlotFromStorage(object):
         def save_finalmodels(models, likes, misfits, noise, vpvs):
             """Save chainmodels as pkl file"""
             names = ['models', 'likes', 'misfits', 'noise', 'vpvs']
-            print '> Saving posterior distribution.'
+            print('> Saving posterior distribution.')
             for i, data in enumerate([models, likes, misfits, noise, vpvs]):
                 outfile = op.join(self.datapath, 'c_%s' % names[i])
                 np.save(outfile, data)
-                print outfile
+                print(outfile)
 
         # delete old outlier file if evaluating outliers newly
         outlierfile = op.join(self.datapath, 'outliers.dat')
@@ -474,7 +474,7 @@ class PlotFromStorage(object):
         # get interfaces, #first
         models2 = ModelMatrix._replace_zvnoi_h(models)
         models2 = np.array([model[~np.isnan(model)] for model in models2])
-        yinterf = np.array([np.cumsum(model[model.size/2:-1])
+        yinterf = np.array([np.cumsum(model[int(model.size/2):-1])
                             for model in models2])
         yinterf = np.concatenate(yinterf)
 
@@ -491,6 +491,8 @@ class PlotFromStorage(object):
         data2d = axes[0].hist2d(vss_flatten, deps_int.flatten(),
                                 bins=(vsbins, depbins), vmax=len(models),
                                 )
+        # ... quads are overlapping just slightly or showing gaps --> results
+        # in weird grid appaerrance in final plot.
 
         # plot mean / modes
         # colors = ['green', 'white']
@@ -624,7 +626,7 @@ class PlotFromStorage(object):
         label = np.concatenate([['correlation (%s)' % ref, '$\sigma$ (%s)' % ref]
                                for ref in self.refs[:-1]])
         
-        pars = len(noise.T)/2
+        pars = int(len(noise.T)/2)
         fig, axes = plt.subplots(pars, 2, figsize=(7, 3*pars))
         fig.subplots_adjust(hspace=0.2)
 
@@ -847,7 +849,7 @@ class PlotFromStorage(object):
 
         median = np.median(mohos)
         std = np.std(mohos)
-        print 'moho: %.4f +- %.4f km' % (median, std)
+        print('moho: %.4f +- %.4f km' % (median, std))
         ax[1][3].axhline(median, color='k', ls='--', lw=1.2, alpha=1)
         stats = 'median:\n%.2f km' % median
         ax[1][3].text(0.97, 0.97, stats,
@@ -1136,7 +1138,7 @@ class PlotFromStorage(object):
         return fig
 
     def merge_pdfs(self):
-        from pyPdf import PdfFileReader, PdfFileWriter
+        from PyPDF2 import PdfFileReader, PdfFileWriter
 
         outputfile = op.join(self.figpath, 'c_summary.pdf')
         output = PdfFileWriter()

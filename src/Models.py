@@ -16,7 +16,7 @@ class Model(object):
     @staticmethod
     def split_modelparams(model):
         model = model[~np.isnan(model)]
-        n = model.size / 2  # layers
+        n = int(model.size / 2)  # layers
 
         vs = model[:n]
         z_vnoi = model[-n:]

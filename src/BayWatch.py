@@ -27,6 +27,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('BayWatch')
 plt.ion()
 
+
 class BayWatcher(object):
 
     def __init__(self, configfile, capacity=100, address='127.0.0.1',
@@ -41,7 +42,6 @@ class BayWatcher(object):
         if save_plots and not op.exists(op.dirname(save_plots)):
             raise OSError('%s does not exist' % op.dirname(save_plots))
         self.save_plots = save_plots
-
 
         data_pars = utils.read_config(configfile)
         defaults = utils.get_path('defaults.ini')
@@ -329,7 +329,7 @@ class BayWatcher(object):
             self.update_chain()
 
     def update_chain(self):
-        print 'New chain index:', self.chainidx
+        print('New chain index:', self.chainidx)
 
         # if new chain is chosen
         self.modelmatrix, self.likes, self.noises, self.vpvss = self.chainarrays[self.chainidx]
@@ -426,7 +426,7 @@ class BayWatcher(object):
         """Take input array and append to list data"""
 
         for idx, chain in enumerate(self.chainarrays):
-            # print idx
+            # print(idx)
             models, likes, noises, vpvss = chain
 
             # if all the incoming values are identical, BayWatch stops updating
@@ -449,7 +449,7 @@ class BayWatcher(object):
 
             if arrmodels is not None and arrvpvs is not None:
                 vpvs = float(arrvpvs[idx])
-                # print vpvs
+                # print(vpvs)
 
                 vpvss = np.roll(vpvss, -1)
                 vpvss[-1] = vpvs
@@ -595,7 +595,6 @@ class BayWatcher(object):
             self.fig.canvas.flush_events()
 
             # keyboard interrupt not working...
-            self.fig.savefig()
 
 
 def main():

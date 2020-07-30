@@ -1,4 +1,4 @@
-# BayHunter v2.0
+# BayHunter v2.1
 
 BayHunter is an open source Python tool to perform an McMC transdimensional Bayesian inversion of surface wave dispersion and/or receiver functions. The algorithm follows a data-driven strategy and solves for the velocity-depth structure, the number of layers, Vp/Vs ratio and noise parameters, i.e., data noise correlation and amplitude. The forward modeling codes are provided within the package, but are easily replaceable with own codes. It is also possible to add (completely different) data sets.
 
@@ -43,12 +43,12 @@ I am Jennifer Dreiling. I finished my PhD studies at the German Research Center 
 ### Requirements
 * matplotlib
 * numpy
-* pyPdf
+* PyPDF2
 * configobj
 * zmq
 * rfmini, only if inverting for RF (`rfmini.tar.gz`)
 
-### Installation (Python 2 environment)
+### Installation (compatible with Python 2 and 3)
 
 ```sh
 git clone https://github.com/jenndrei/BayHunter.git
@@ -58,7 +58,7 @@ sudo python setup.py install
 
 ### Documentation and Tutorial
 
-The documentation to BayHunter offers background information on the inversion algorithm, the parameters and usage of BayHunter and BayWatch (tutorial). See the [documentation here](https://jenndrei.github.io/BayHunter/) or download the [PDF](https://github.com/jenndrei/BayHunter/blob/master/documentation/BayHunter_v2.0_documentation.pdf).
+The documentation to BayHunter offers background information on the inversion algorithm, the parameters and usage of BayHunter and BayWatch (tutorial). See the [documentation here](https://jenndrei.github.io/BayHunter/) or download the [PDF](https://github.com/jenndrei/BayHunter/blob/master/documentation/BayHunter_v2.0_documentation.pdf). Also check out the [FAQs](https://jenndrei.github.io/BayHunter/FAQs).
 
 An example inversion can be found in the **tutorial folder**.
 The file to be run, `tutorialhunt.py`, is spiked with comments.
