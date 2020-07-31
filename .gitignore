@@ -105,3 +105,4 @@ venv.bak/
 
 #
 *~
+src/extensions/rfmini/*.c

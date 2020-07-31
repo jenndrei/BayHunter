@@ -7,9 +7,7 @@
 # #############################
 
 import numpy as np
-import rfmini
-
-degrees2kilometers = 111.19492664455873
+from BayHunter import rfmini
 
 
 class RFminiModRF(object):
@@ -61,7 +59,7 @@ class RFminiModRF(object):
 
         # get nsamp
         ndata = self.obsx.size
-        self.nsamp = 2**int(np.ceil(np.log2(ndata * 2)))
+        self.nsamp = 2.**int(np.ceil(np.log2(ndata * 2)))
 
     def write_startmodel(self, h, vp, vs, rho, modfile, **params):
         qp = params.get('qp', np.ones(h.size) * 500)
@@ -114,7 +112,7 @@ class RFminiModRF(object):
         """
         gauss = self.modelparams['gauss']
         water = self.modelparams['water']
-        p = self.modelparams['p']/degrees2kilometers
+        p = self.modelparams['p']
         wtype = self.modelparams['wtype']
         nsv = self.modelparams['nsv']
 

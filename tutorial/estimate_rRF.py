@@ -10,7 +10,7 @@ from BayHunter import utils
 rfx, rfy = np.loadtxt('observed/st3_prf.dat').T  # synth RF, Gauss factor a=1
 rfa = 1  # a
 dt = 0.2  # RF sampling rate
-draws = 50000
+draws = 40000
 # more draws (= larger sample) show more precise and smoother results,
 # but are slower in computation.
 
@@ -39,9 +39,9 @@ pars['draws'] = 2000
 # quicker computation by less draws (= smaller sample size from distribution),
 # but also larger uncertainties of results. To compensate for the smaller
 # sample, draw more samples by looping over a number.
-# However, I recommend to increase the number of draws (e.g., 50 000)
+# However, I recommend to increase the number of draws (e.g., 30 000)
 # and wait a bit longer...
-# As always, test different settings to find your best r_RF... estimate
+# As always, test different settings to find your best r_RF estimate
 
 plt.close()
 fig, ax = plt.subplots()

@@ -46,7 +46,7 @@ I am Jennifer Dreiling. I finished my PhD studies at the German Research Center 
 * PyPDF2
 * configobj
 * zmq
-* rfmini, only if inverting for RF (`rfmini.tar.gz`)
+* Cython
 
 ### Installation (compatible with Python 2 and 3)
 

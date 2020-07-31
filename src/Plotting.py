@@ -546,7 +546,7 @@ class PlotFromStorage(object):
         mode = cbins[np.argmax(count)]
         median = np.median(data)
 
-        if not formatter is None:
+        if formatter is not None:
             text = 'median: %s' % formatter % median
             ax.text(0.97, 0.97, text,
                     fontsize=9, color='k',
@@ -625,14 +625,14 @@ class PlotFromStorage(object):
         noise, = self._get_posterior_data(['noise'], final, chainidx)
         label = np.concatenate([['correlation (%s)' % ref, '$\sigma$ (%s)' % ref]
                                for ref in self.refs[:-1]])
-        
+
         pars = int(len(noise.T)/2)
         fig, axes = plt.subplots(pars, 2, figsize=(7, 3*pars))
         fig.subplots_adjust(hspace=0.2)
 
         for i, data in enumerate(noise.T):
             if self.ntargets > 1:
-                ax = axes[i/2][i % 2]
+                ax = axes[int(i/2)][i % 2]
             else:
                 ax = axes[i % 2]
 
@@ -642,24 +642,24 @@ class PlotFromStorage(object):
                 formatter = None
                 ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)
                 ax.text(0.5, 0.5, 'constant: %.2f' % m, horizontalalignment='center',
-                        verticalalignment='center', transform = ax.transAxes,
+                        verticalalignment='center', transform=ax.transAxes,
                         fontsize=12)
                 ax.set_xticks([])
             else:
                 bins = 20
                 formatter = '%.4f'
-                ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)    
+                ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)
             ax.set_xlabel(label[i])
         return fig
-    
+
     @tryexcept
     def plot_posterior_others(self, final=True, chainidx=0):
         likes, = self._get_posterior_data(['likes'], final, chainidx)
-        
+
         misfits, = self._get_posterior_data(['misfits'], final, chainidx)
-        misfits = misfits.T[-1] # only joint misfit
+        misfits = misfits.T[-1]  # only joint misfit
         vpvs, = self._get_posterior_data(['vpvs'], final, chainidx)
-        
+
         models, = self._get_posterior_data(['models'], final, chainidx)
         models = np.array([model[~np.isnan(model)] for model in models])
         layers = np.array([(model.size/2 - 1) for model in models])
@@ -674,19 +674,19 @@ class PlotFromStorage(object):
         for i, data in enumerate([likes, misfits, vpvs, layers]):
             ax = axes[i]
 
-            if i==2 and np.std(data) == 0: # constant vpvs
+            if i == 2 and np.std(data) == 0:  # constant vpvs
                 m = np.mean(data)
                 bins = [m-1, m-0.1, m+0.1, m+1]
                 formatter = None
                 ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)
                 ax.text(0.5, 0.5, 'constant: %.2f' % m, horizontalalignment='center',
-                        verticalalignment='center', transform = ax.transAxes,
+                        verticalalignment='center', transform=ax.transAxes,
                         fontsize=12)
                 ax.set_xticks([])
             else:
                 formatter = formatters[i]
                 bins = nbins[i]
-                ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)    
+                ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)
 
                 if i == 3:
                     xticks = np.arange(layers.min(), layers.max()+1)

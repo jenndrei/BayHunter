@@ -64,7 +64,6 @@ class BayWatcher(object):
         # self.colors = ['purple', 'green', 'orange' 'red', 'brown', 'blue']
         self.colors = ['teal', 'lightcoral', 'saddlebrown', 'magenta', 'royalblue']
 
-
         self.targets = data_pars['targets']
         self.targetrefs = [target.ref for target in self.targets]
         self.ntargets = len(self.targets)
@@ -121,7 +120,7 @@ class BayWatcher(object):
 
         # plot 1, vpvs
         self.vpvsline = self.axes[5].axvline(np.nan, color='k', lw=1.2)
-        
+
         a = np.repeat(([0, 1], ), self.capacity, axis=0)
         b = np.array([[v]*2 for v in self.vpvss])
         segments = [np.column_stack([x, y]) for x, y in zip(b, a)]
@@ -131,23 +130,23 @@ class BayWatcher(object):
         self.vpvscollection = self.axes[5].add_collection(lc)
         self.vpvscollection.set_linewidths(0.7)
 
-        if type(self.priors['vpvs']) in [tuple,list,np.array]:
+        if type(self.priors['vpvs']) in [tuple, list, np.array]:
             self.axes[5].set_xlim(self.priors['vpvs'])
             self.axes[5].set_title('Vp/Vs', fontsize=10)
-            self.axes[5].tick_params(axis="x",direction="in", pad=-15)
+            self.axes[5].tick_params(axis="x", direction="in", pad=-15)
 
         elif type(self.priors['vpvs']) == float:
             self.axes[5].set_xlim(self.priors['vpvs']-0.2, self.priors['vpvs']-0.1)
-            self.axes[5].text(0.5, 0.5, 'Vp/Vs: %.2f' % self.priors['vpvs'], 
-                                   horizontalalignment='center',
-                                   verticalalignment='center',
-                                   transform=self.axes[5].transAxes,
-                                   fontsize=11)
-            self.axes[5].set_xticks([])    
-        
+            self.axes[5].text(0.5, 0.5, 'Vp/Vs: %.2f' % self.priors['vpvs'],
+                              horizontalalignment='center',
+                              verticalalignment='center',
+                              transform=self.axes[5].transAxes,
+                              fontsize=11)
+            self.axes[5].set_xticks([])
+
         self.axes[5].set_ylim([0, 1])
         self.axes[5].set_yticks([])
-        
+
         # -----------------------------------
         # plot 2, plot3: modeled and observed data
         # self.axes[1].yaxis.tick_right()
@@ -200,8 +199,6 @@ class BayWatcher(object):
         labels = lab1 + lab2
         self.axes[2].legend(handles, labels, loc='upper left', fancybox=True,
                             bbox_to_anchor=(0, -0.15), frameon=True, ncol=3)
-        # self.axes[1].legend()
-        # self.axes[2].legend()
 
         # grid lines for receiver functions
         self.axes[2].axhline(0, color='k', ls='--', lw=0.5)
@@ -239,7 +236,6 @@ class BayWatcher(object):
         self.axes[3].spines['right'].set_visible(False)
         self.axes[4].spines['top'].set_visible(False)
         self.axes[4].spines['right'].set_visible(False)
-
 
         # reference model
         dep, vs = self.refmodel.get('model', ([np.nan], [np.nan]))
