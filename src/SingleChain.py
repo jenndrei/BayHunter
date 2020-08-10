@@ -18,6 +18,10 @@ import logging
 logger = logging.getLogger()
 
 
+PAR_MAP = {'vsmod': 0, 'zvmod': 1, 'birth': 2, 'death': 2,
+           'noise': 3, 'vpvs': 4}
+
+
 class SingleChain(object):
 
     def __init__(self, targets, chainidx=0, initparams={}, modelpriors={},
@@ -418,56 +422,30 @@ exponential law. Explicitly state a noise reference for your user target \
 
 # accept / save current models
 
-    def adjust_acceptrate(self):
+    def adjust_propdist(self):
         """
         Modify self.propdist to adjust acceptance rate of models to given
         percentace span: increase or decrease by five percent.
         """
-        # for accepted models, mean birth and death's models,
-        # as theta (propdist) must be equal
-        if len(self.modifications) == 4:
-            accepted = np.concatenate((self.accepted[:2],
-                                      [np.sum(self.accepted[2:4])]))
-            proposed = np.concatenate((self.proposed[:2],
-                                      [np.sum(self.proposed[2:4])]))
+        with np.errstate(invalid='ignore'):
+            acceptrate = self.accepted / self.proposed * 100
 
-        elif len(self.modifications) == 5:  # either 'noise' or 'vpvs'
-            accepted = np.concatenate((self.accepted[:2],
-                                      [np.sum(self.accepted[2:4])],
-                                      [self.accepted[4]]))
-
-            proposed = np.concatenate((self.proposed[:2],
-                                       [np.sum(self.proposed[2:4])],
-                                       [self.proposed[4]]))
-
-        elif len(self.modifications) == 6:  # 'noise' and 'vpvs'
-            accepted = np.concatenate((self.accepted[:2],
-                                      [np.sum(self.accepted[2:4])],
-                                      self.accepted[4:6]))
-
-            proposed = np.concatenate((self.proposed[:2],
-                                       [np.sum(self.proposed[2:4])],
-                                       self.proposed[4:6]))
-
-        acceptrate = accepted / proposed * 100.
-
-        propdistmin = [0.001, 0.001, 0.001, 0.001, 0.001]
+        # minimum distribution width forced to be not less than 1 m/s, 1 m
+        # actually only touched by vs distribution
+        propdistmin = np.full(acceptrate.size, 0.001)
 
         for i, rate in enumerate(acceptrate):
-            if i < 3:
-                n = i
-            elif i == 3 and 'noise' in self.modifications:
-                n = 3  # noise
-            else:
-                n = 4  # vpvs
-
+            if np.isnan(rate):
+                # only if not inverted for
+                continue
             if rate < self.acceptance[0]:
-                new = self.propdist[n] * 0.95
+                new = self.propdist[i] * 0.95
                 if new < propdistmin[i]:
                     new = propdistmin[i]
-                self.propdist[n] = new
+                self.propdist[i] = new
+
             elif rate > self.acceptance[1]:
-                self.propdist[n] = self.propdist[n] * 1.05
+                self.propdist[i] = self.propdist[i] * 1.05
             else:
                 pass
 
@@ -492,7 +470,7 @@ exponential law. Explicitly state a noise reference for your user target \
             theta = self.propdist[2]  # Gaussian distribution
             # self.dvs2 = delta vs square = np.square(v'_(k+1) - v_(i))
             A = (theta * np.sqrt(2 * np.pi)) / self.dv
-            B = self.dvs2 / (2 * np.square(theta))
+            B = self.dvs2 / (2. * np.square(theta))
             C = self.targets.proposallikelihood - self.currentlikelihood
 
             alpha = np.log(A) + B + C
@@ -501,7 +479,7 @@ exponential law. Explicitly state a noise reference for your user target \
             theta = self.propdist[2]  # Gaussian distribution
             # self.dvs2 = delta vs square = np.square(v'_(j) - v_(i))
             A = self.dv / (theta * np.sqrt(2 * np.pi))
-            B = self.dvs2 / (2 * np.square(theta))
+            B = self.dvs2 / (2. * np.square(theta))
             C = self.targets.proposallikelihood - self.currentlikelihood
 
             alpha = np.log(A) - B + C
@@ -571,13 +549,12 @@ exponential law. Explicitly state a noise reference for your user target \
         vp, vs, h = Model.get_vp_vs_h(proposalmodel, proposalvpvs, self.mantle)
         self.targets.evaluate(h=h, vp=vp, vs=vs, noise=proposalnoise)
 
-        aidx = self.modifications.index(modify)
-        self.proposed[aidx] += 1
+        paridx = PAR_MAP[modify]
+        self.proposed[paridx] += 1
 
         # Replace self.currentmodel with proposalmodel with acceptance
         # probability alpha. Accept candidate sample (proposalmodel)
         # with probability alpha, or reject it with probability (1 - alpha).
-
         # these are log values ! alpha is log.
         u = np.log(self.rstate.uniform(0, 1))
         alpha = self.get_acceptance_probability(modify)
@@ -587,7 +564,7 @@ exponential law. Explicitly state a noise reference for your user target \
             # always the case if self.jointlike > self.bestlike (alpha>1)
             self.accept_as_currentmodel(proposalmodel, proposalnoise, proposalvpvs)
             self.append_currentmodel()
-            self.accepted[aidx] += 1
+            self.accepted[paridx] += 1
 
         # print inversion status information
         if self.iiter % 5000 == 0:
@@ -607,7 +584,7 @@ exponential law. Explicitly state a noise reference for your user target \
         # stabilize model acceptance rate
         if self.iiter % 1000 == 0:
             if np.all(self.proposed) != 0:
-                self.adjust_acceptrate()
+                self.adjust_propdist()
 
         self.iiter += 1
 
@@ -621,8 +598,8 @@ exponential law. Explicitly state a noise reference for your user target \
         self.vpvsmods = [] if type(self.priors['vpvs']) == np.float else ['vpvs']
         self.modifications = self.modelmods + self.noisemods + self.vpvsmods
 
-        self.accepted = np.zeros(len(self.modifications))
-        self.proposed = np.zeros(len(self.modifications))
+        self.accepted = np.zeros(len(self.propdist))
+        self.proposed = np.zeros(len(self.propdist))
 
         while self.iiter < self.iter_phase2:
             self.iterate()

@@ -56,7 +56,7 @@ Application examples
 Documentation
 -------------
 
-The documentation to BayHunter contains three chapters, accessible through the navigation menu, and downloadable as `PDF <https://github.com/jenndrei/BayHunter/blob/master/documentation/BayHunter_v2.0_documentation.pdf>`_. 
+The documentation to BayHunter contains three chapters, accessible through the navigation menu, and downloadable as `PDF <https://github.com/jenndrei/BayHunter/blob/master/documentation/BayHunter_v2.1_documentation.pdf>`_. 
 
 - **Introduction**: Bayes theorem, McMC inversion approach
 
@@ -99,12 +99,12 @@ Requirements
 
 -  ``zmq``
 
--  ``rfmini``, only if inverting for RF (rfmini.tar.gz)
+-  ``Cython``
 
 Installation
 ------------
 
-(Python 2 environment)
+(compatible with Python 2 and 3)
 
 ::
 

@@ -18,7 +18,6 @@ from multiprocessing import sharedctypes
 
 import matplotlib.cm as cm
 from collections import OrderedDict
-import cPickle
 
 from BayHunter.utils import SerializingContext
 from BayHunter import Model, ModelMatrix

@@ -40,7 +40,7 @@ span.\nFrom this data, the dispersion velocities to your observed periods \
 will be determined. The precision of the data will depend on the distribution \
 of your samples and the complexity of the input velocity-depth model."
             self.obsx_int = np.linspace(obsx.min(), obsx.max(), 60)
-            print message
+            print(message)
 
     def set_modelparams(self, **mparams):
         self.modelparams.update(mparams)

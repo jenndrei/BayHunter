@@ -154,8 +154,12 @@ def save_config(targets, configfile, priors=dict(), initparams=dict()):
 
 
 def read_config(configfile):
-    with open(configfile, 'rb') as f:
-        data = pickle.load(f)
+    try:  # python2
+        with open(configfile, 'rb') as f:
+            data = pickle.load(f)
+    except:  # python3
+        with open(configfile, 'rb') as f:
+            data = pickle.load(f, encoding='latin1')
 
     return data
 
@@ -223,8 +227,8 @@ def _spec_resample(frq, Y):
     y_values = np.zeros((bins)) * np.nan  # Y
 
     hist, xedges, yedges = np.histogram2d(frq, Y, bins=bins)
-    xbin = (xedges[:-1] + xedges[1:])/2
-    ybin = (yedges[:-1] + yedges[1:])/2
+    xbin = (xedges[:-1] + xedges[1:])/2.
+    ybin = (yedges[:-1] + yedges[1:])/2.
 
     ybin = ybin[::-1]
 

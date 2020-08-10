@@ -26,14 +26,20 @@ logger = logging.getLogger(__name__)
 rstate = np.random.RandomState(333)
 
 
+def vs_round(vs):
+    # rounding down to next smaller 0.025 interval
+    vs_floor = np.floor(vs)
+    return np.round((vs-vs_floor)*40)/40 + vs_floor
+
+
 def tryexcept(func):
     def wrapper_tryexcept(*args, **kwargs):
         try:
             output = func(*args, **kwargs)
             return output
         except Exception as e:
-            print '* %s: Plotting was not possible\nErrorMessage: %s' \
-                % (func.__name__, e)
+            print('* %s: Plotting was not possible\nErrorMessage: %s'
+                  % (func.__name__, e))
             return None
     return wrapper_tryexcept
 
@@ -54,7 +60,7 @@ class PlotFromStorage(object):
 
         self.datapath = op.dirname(configfile)
         self.figpath = self.datapath.replace('data', '')
-        print 'Current data path: %s' % self.datapath
+        print('Current data path: %s' % self.datapath)
 
         self.init_filelists()
         self.init_outlierlist()
@@ -79,9 +85,9 @@ class PlotFromStorage(object):
         outlierfile = op.join(self.datapath, 'outliers.dat')
         if op.exists(outlierfile):
             self.outliers = np.loadtxt(outlierfile, usecols=[0], dtype=int)
-            print 'Outlier chains from file: %d' % self.outliers.size
+            print('Outlier chains from file: %d' % self.outliers.size)
         else:
-            print 'Outlier chains from file: None'
+            print('Outlier chains from file: None')
             self.outliers = np.zeros(0)
 
     def init_filelists(self):
@@ -137,8 +143,8 @@ class PlotFromStorage(object):
         outscores = 1 - scores[np.where(((1-scores) > dev))]
 
         if len(outliers) > 0:
-            print 'Outlier chains found with following chainindices:\n'
-            print outliers
+            print('Outlier chains found with following chainindices:\n')
+            print(outliers)
             outlierfile = op.join(self.datapath, 'outliers.dat')
             with open(outlierfile, 'w') as f:
                 f.write('# Outlier chainindices with %.3f deviation condition\n' % dev)
@@ -172,11 +178,11 @@ class PlotFromStorage(object):
         def save_finalmodels(models, likes, misfits, noise, vpvs):
             """Save chainmodels as pkl file"""
             names = ['models', 'likes', 'misfits', 'noise', 'vpvs']
-            print '> Saving posterior distribution.'
+            print('> Saving posterior distribution.')
             for i, data in enumerate([models, likes, misfits, noise, vpvs]):
                 outfile = op.join(self.datapath, 'c_%s' % names[i])
                 np.save(outfile, data)
-                print outfile
+                print(outfile)
 
         # delete old outlier file if evaluating outliers newly
         outlierfile = op.join(self.datapath, 'outliers.dat')
@@ -474,7 +480,7 @@ class PlotFromStorage(object):
         # get interfaces, #first
         models2 = ModelMatrix._replace_zvnoi_h(models)
         models2 = np.array([model[~np.isnan(model)] for model in models2])
-        yinterf = np.array([np.cumsum(model[model.size/2:-1])
+        yinterf = np.array([np.cumsum(model[int(model.size/2):-1])
                             for model in models2])
         yinterf = np.concatenate(yinterf)
 
@@ -482,15 +488,24 @@ class PlotFromStorage(object):
         singlemodels = ModelMatrix.get_singlemodels(models, dep_int=depbins)
 
         vss_flatten = vss_int.flatten()
-        vsbins = int((vss_flatten.max() - vss_flatten.min()) / 0.025)
+        vsinterval = 0.025  # km/s, 0.025 is assumption for vs_round
+        # vsbins = int((vss_flatten.max() - vss_flatten.min()) / vsinterval)
+        vs_histmin = vs_round(vss_flatten.min())-2*vsinterval
+        vs_histmax = vs_round(vss_flatten.max())+3*vsinterval
+        vsbins = np.arange(vs_histmin, vs_histmax, vsinterval) # some buffer
 
         # initiate plot
         fig, axes = plt.subplots(1, 2, gridspec_kw={'width_ratios': [4, 1]},
                                  sharey=True, figsize=(5, 6.5))
         fig.subplots_adjust(wspace=0.05)
-        data2d = axes[0].hist2d(vss_flatten, deps_int.flatten(),
-                                bins=(vsbins, depbins), vmax=len(models),
-                                )
+
+        data2d, xedges, yedges = np.histogram2d(vss_flatten, deps_int.flatten(),
+                                				bins=(vsbins, depbins))
+
+        axes[0].imshow(data2d.T, extent=(xedges[0], xedges[-1],
+        							     yedges[0], yedges[-1]),
+        			   origin='lower',
+        			   vmax=len(models), aspect='auto')
 
         # plot mean / modes
         # colors = ['green', 'white']
@@ -544,7 +559,7 @@ class PlotFromStorage(object):
         mode = cbins[np.argmax(count)]
         median = np.median(data)
 
-        if not formatter is None:
+        if formatter is not None:
             text = 'median: %s' % formatter % median
             ax.text(0.97, 0.97, text,
                     fontsize=9, color='k',
@@ -623,14 +638,14 @@ class PlotFromStorage(object):
         noise, = self._get_posterior_data(['noise'], final, chainidx)
         label = np.concatenate([['correlation (%s)' % ref, '$\sigma$ (%s)' % ref]
                                for ref in self.refs[:-1]])
-        
-        pars = len(noise.T)/2
+
+        pars = int(len(noise.T)/2)
         fig, axes = plt.subplots(pars, 2, figsize=(7, 3*pars))
         fig.subplots_adjust(hspace=0.2)
 
         for i, data in enumerate(noise.T):
             if self.ntargets > 1:
-                ax = axes[i/2][i % 2]
+                ax = axes[int(i/2)][i % 2]
             else:
                 ax = axes[i % 2]
 
@@ -640,24 +655,24 @@ class PlotFromStorage(object):
                 formatter = None
                 ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)
                 ax.text(0.5, 0.5, 'constant: %.2f' % m, horizontalalignment='center',
-                        verticalalignment='center', transform = ax.transAxes,
+                        verticalalignment='center', transform=ax.transAxes,
                         fontsize=12)
                 ax.set_xticks([])
             else:
                 bins = 20
                 formatter = '%.4f'
-                ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)    
+                ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)
             ax.set_xlabel(label[i])
         return fig
-    
+
     @tryexcept
     def plot_posterior_others(self, final=True, chainidx=0):
         likes, = self._get_posterior_data(['likes'], final, chainidx)
-        
+
         misfits, = self._get_posterior_data(['misfits'], final, chainidx)
-        misfits = misfits.T[-1] # only joint misfit
+        misfits = misfits.T[-1]  # only joint misfit
         vpvs, = self._get_posterior_data(['vpvs'], final, chainidx)
-        
+
         models, = self._get_posterior_data(['models'], final, chainidx)
         models = np.array([model[~np.isnan(model)] for model in models])
         layers = np.array([(model.size/2 - 1) for model in models])
@@ -672,19 +687,19 @@ class PlotFromStorage(object):
         for i, data in enumerate([likes, misfits, vpvs, layers]):
             ax = axes[i]
 
-            if i==2 and np.std(data) == 0: # constant vpvs
+            if i == 2 and np.std(data) == 0:  # constant vpvs
                 m = np.mean(data)
                 bins = [m-1, m-0.1, m+0.1, m+1]
                 formatter = None
                 ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)
                 ax.text(0.5, 0.5, 'constant: %.2f' % m, horizontalalignment='center',
-                        verticalalignment='center', transform = ax.transAxes,
+                        verticalalignment='center', transform=ax.transAxes,
                         fontsize=12)
                 ax.set_xticks([])
             else:
                 formatter = formatters[i]
                 bins = nbins[i]
-                ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)    
+                ax = self._plot_posterior_distribution(data, bins, formatter, ax=ax)
 
                 if i == 3:
                     xticks = np.arange(layers.min(), layers.max()+1)
@@ -713,7 +728,7 @@ class PlotFromStorage(object):
         ax.set_title('%d models from %d chains' % (len(models), nchains))
         return fig
 
-    @tryexcept
+    #@tryexcept
     def plot_posterior_models2d(self, final=True, chainidx=0, depint=1):
         if final:
             nchains = self.initparams['nchains'] - self.outliers.size
@@ -847,7 +862,7 @@ class PlotFromStorage(object):
 
         median = np.median(mohos)
         std = np.std(mohos)
-        print 'moho: %.4f +- %.4f km' % (median, std)
+        print('moho: %.4f +- %.4f km' % (median, std))
         ax[1][3].axhline(median, color='k', ls='--', lw=1.2, alpha=1)
         stats = 'median:\n%.2f km' % median
         ax[1][3].text(0.97, 0.97, stats,
@@ -1136,7 +1151,7 @@ class PlotFromStorage(object):
         return fig
 
     def merge_pdfs(self):
-        from pyPdf import PdfFileReader, PdfFileWriter
+        from PyPDF2 import PdfFileReader, PdfFileWriter
 
         outputfile = op.join(self.figpath, 'c_summary.pdf')
         output = PdfFileWriter()

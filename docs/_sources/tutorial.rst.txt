@@ -26,16 +26,11 @@ BayHunter is currently for a Python 2 environment (as of October, 2019). After i
 ``pyPdf``      merging PDFs
 ``configobj``  configuration file
 ``zmq``        BayWatch, inversion live-streaming
-``rfmini``     receiver function forward modeling
+``Cython``     C-extensions for Python
 ============== ==================================
 
-The Fortran forward modeling code for surface wave dispersion is already
-included in the BayHunter package and will be compiled when installing
-BayHunter. BayHunter uses a Python wrapper interfacing the
-``SURF96`` routine from :doc:`Herrmann and Ammon, 2002 <references>`. The code to forward model receiver functions, however, must be installed
-(only if wished to invert for receiver functions). A copy of ``rfmini`` and
-installation instructions can be found in the BayHunter package
-(``rfmini.tar.gz``). The code ``rfmini`` was developed for BayHunter by
+The forward modeling codes for surface wave dispersion and receiver functions are already included in the BayHunter package and will be compiled when installing BayHunter. BayHunter uses a Python wrapper interfacing the
+``SURF96`` routine from :doc:`Herrmann and Ammon, 2002 <references>`, and  ``rfmini`` developed for BayHunter by
 `Joachim Saul, GFZ <https://www.gfz-potsdam.de/en/staff/joachim-saul/>`_.
 
 .. _sec:baysetup:
