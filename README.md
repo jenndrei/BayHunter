@@ -58,7 +58,7 @@ sudo python setup.py install
 
 ### Documentation and Tutorial
 
-The documentation to BayHunter offers background information on the inversion algorithm, the parameters and usage of BayHunter and BayWatch (tutorial). See the [documentation here](https://jenndrei.github.io/BayHunter/) or download the [PDF](https://github.com/jenndrei/BayHunter/blob/master/documentation/BayHunter_v2.0_documentation.pdf). Also check out the [FAQs](https://jenndrei.github.io/BayHunter/FAQs).
+The documentation to BayHunter offers background information on the inversion algorithm, the parameters and usage of BayHunter and BayWatch (tutorial). See the [documentation here](https://jenndrei.github.io/BayHunter/) or download the [PDF](https://github.com/jenndrei/BayHunter/blob/master/documentation/BayHunter_v2.1_documentation.pdf). Also check out the [FAQs](https://jenndrei.github.io/BayHunter/FAQs).
 
 An example inversion can be found in the **tutorial folder**.
 The file to be run, `tutorialhunt.py`, is spiked with comments.

@@ -80,7 +80,7 @@ the default values differ from the values used for RF computation.
 Each of the target classes comes with a forward modeling plugin, which
 is easily exchangeable. For surface waves, a quick Fortran routine based
 on ``SURF96`` (:doc:`Herrmann and Ammon, 2002 <references>`) is
-pre-installed. For receiver functions, the plugin is based on ``rfmini``
+pre-installed. For receiver functions, the pre-installed routine is based on ``rfmini``
 (`Joachim Saul, GFZ <https://www.gfz-potsdam.de/en/staff/joachim-saul/>`_). Also other targets can be defined.
 
 Parametrization of the model

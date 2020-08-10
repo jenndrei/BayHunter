@@ -182,7 +182,7 @@
 
 <span class="c1"># define parameters</span>
 <span class="n">dt</span> <span class="o">=</span> <span class="mf">0.2</span>
-<span class="n">draws</span> <span class="o">=</span> <span class="mi">50000</span>
+<span class="n">draws</span> <span class="o">=</span> <span class="mi">40000</span>
 <span class="n">rrfs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.97</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">]</span>
 
 <span class="n">pars</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;rfx&#39;</span><span class="p">:</span> <span class="n">rfx</span><span class="p">,</span> <span class="s1">&#39;rfy&#39;</span><span class="p">:</span> <span class="n">rfy</span><span class="p">,</span> <span class="s1">&#39;rfa&#39;</span><span class="p">:</span> <span class="n">rfa</span><span class="p">,</span>
@@ -197,7 +197,7 @@
 <span class="c1"># --------------------------- return values for costum visualization</span>
 <span class="c1"># update parameters...</span>
 <span class="n">pars</span><span class="p">[</span><span class="s1">&#39;rrfs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
-<span class="n">pars</span><span class="p">[</span><span class="s1">&#39;draws&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20000</span>
+<span class="n">pars</span><span class="p">[</span><span class="s1">&#39;draws&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2000</span>
 
 <span class="c1"># get rrf-values with corresponding a-values</span>
 <span class="n">rrf</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">rrf_estimate</span><span class="p">(</span><span class="n">pars</span><span class="o">=</span><span class="n">pars</span><span class="p">)</span>

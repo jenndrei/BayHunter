@@ -128,18 +128,13 @@ minimalistic working example is shown in the <a class="reference internal" href=
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">zmq</span></code></p></td>
 <td><p>BayWatch, inversion live-streaming</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rfmini</span></code></p></td>
-<td><p>receiver function forward modeling</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Cython</span></code></p></td>
+<td><p>C-extensions for Python</p></td>
 </tr>
 </tbody>
 </table>
-<p>The Fortran forward modeling code for surface wave dispersion is already
-included in the BayHunter package and will be compiled when installing
-BayHunter. BayHunter uses a Python wrapper interfacing the
-<code class="docutils literal notranslate"><span class="pre">SURF96</span></code> routine from <a class="reference internal" href="references.html"><span class="doc">Herrmann and Ammon, 2002</span></a>. The code to forward model receiver functions, however, must be installed
-(only if wished to invert for receiver functions). A copy of <code class="docutils literal notranslate"><span class="pre">rfmini</span></code> and
-installation instructions can be found in the BayHunter package
-(<code class="docutils literal notranslate"><span class="pre">rfmini.tar.gz</span></code>). The code <code class="docutils literal notranslate"><span class="pre">rfmini</span></code> was developed for BayHunter by
+<p>The forward modeling codes for surface wave dispersion and receiver functions are already included in the BayHunter package and will be compiled when installing BayHunter. BayHunter uses a Python wrapper interfacing the
+<code class="docutils literal notranslate"><span class="pre">SURF96</span></code> routine from <a class="reference internal" href="references.html"><span class="doc">Herrmann and Ammon, 2002</span></a>, and  <code class="docutils literal notranslate"><span class="pre">rfmini</span></code> developed for BayHunter by
 <a class="reference external" href="https://www.gfz-potsdam.de/en/staff/joachim-saul/">Joachim Saul, GFZ</a>.</p>
 </div>
 <div class="section" id="setting-up-and-running-an-inversion">

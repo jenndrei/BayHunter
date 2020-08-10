@@ -26,6 +26,12 @@ logger = logging.getLogger(__name__)
 rstate = np.random.RandomState(333)
 
 
+def vs_round(vs):
+    # rounding down to next smaller 0.025 interval
+    vs_floor = np.floor(vs)
+    return np.round((vs-vs_floor)*40)/40 + vs_floor
+
+
 def tryexcept(func):
     def wrapper_tryexcept(*args, **kwargs):
         try:
@@ -482,17 +488,24 @@ class PlotFromStorage(object):
         singlemodels = ModelMatrix.get_singlemodels(models, dep_int=depbins)
 
         vss_flatten = vss_int.flatten()
-        vsbins = int((vss_flatten.max() - vss_flatten.min()) / 0.025)
+        vsinterval = 0.025  # km/s, 0.025 is assumption for vs_round
+        # vsbins = int((vss_flatten.max() - vss_flatten.min()) / vsinterval)
+        vs_histmin = vs_round(vss_flatten.min())-2*vsinterval
+        vs_histmax = vs_round(vss_flatten.max())+3*vsinterval
+        vsbins = np.arange(vs_histmin, vs_histmax, vsinterval) # some buffer
 
         # initiate plot
         fig, axes = plt.subplots(1, 2, gridspec_kw={'width_ratios': [4, 1]},
                                  sharey=True, figsize=(5, 6.5))
         fig.subplots_adjust(wspace=0.05)
-        data2d = axes[0].hist2d(vss_flatten, deps_int.flatten(),
-                                bins=(vsbins, depbins), vmax=len(models),
-                                )
-        # ... quads are overlapping just slightly or showing gaps --> results
-        # in weird grid appaerrance in final plot.
+
+        data2d, xedges, yedges = np.histogram2d(vss_flatten, deps_int.flatten(),
+                                				bins=(vsbins, depbins))
+
+        axes[0].imshow(data2d.T, extent=(xedges[0], xedges[-1],
+        							     yedges[0], yedges[-1]),
+        			   origin='lower',
+        			   vmax=len(models), aspect='auto')
 
         # plot mean / modes
         # colors = ['green', 'white']
@@ -715,7 +728,7 @@ class PlotFromStorage(object):
         ax.set_title('%d models from %d chains' % (len(models), nchains))
         return fig
 
-    @tryexcept
+    #@tryexcept
     def plot_posterior_models2d(self, final=True, chainidx=0, depint=1):
         if final:
             nchains = self.initparams['nchains'] - self.outliers.size

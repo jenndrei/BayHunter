@@ -94,7 +94,7 @@ Estimation of :math:`r_{RF}`
 
    # define parameters
    dt = 0.2
-   draws = 50000
+   draws = 40000
    rrfs = [0.75, 0.85, 0.95, 0.97, 0.98, 0.99]
 
    pars = {'rfx': rfx, 'rfy': rfy, 'rfa': rfa,
@@ -109,7 +109,7 @@ Estimation of :math:`r_{RF}`
    # --------------------------- return values for costum visualization
    # update parameters...
    pars['rrfs'] = np.linspace(0.9, 0.999, 25)
-   pars['draws'] = 20000
+   pars['draws'] = 2000
 
    # get rrf-values with corresponding a-values
    rrf, a = utils.rrf_estimate(pars=pars)

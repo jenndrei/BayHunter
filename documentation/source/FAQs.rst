@@ -7,9 +7,9 @@ FAQs
 ====
 
 
-- **Is BayHunter available for Python3?**
+- **Which Python version requieres BayHunter?**
 
-BayHunter will be available for Python3 soon.
+BayHunter is compatible with Python2 and Python3.
 
 
 - **What noise sources are represented in the noise amplitude?**
