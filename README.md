@@ -48,7 +48,9 @@ I am Jennifer Dreiling. I finished my PhD studies at the German Research Center 
 * zmq
 * Cython
 
-### Installation (compatible with Python 2 and 3)
+### Installation (compatible with Python 2 and 3)*
+
+*Although BayHunter is currently compatible with Python 2 and 3, we recommend you to upgrade to Python 3, as the official support for Python 2 has stopped in January 2020.
 
 ```sh
 git clone https://github.com/jenndrei/BayHunter.git
