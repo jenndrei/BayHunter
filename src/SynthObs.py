@@ -12,7 +12,7 @@ from BayHunter import Targets
 
 logger = logging.getLogger()
 
-rstate = np.random.RandomState(None)
+rstate = np.random.RandomState(333)
 
 
 class SynthObs():
@@ -214,5 +214,9 @@ class SynthObs():
             logL_part = -0.5 * (size * np.log(2*np.pi) + logc_det)
             logL_target = (logL_part - madist / 2.)
             logL += logL_target
+
+            # print(madist, c_inv, logc_det, logL_target)
+            print(logc_det)
+        print(logL)
 
         return logL

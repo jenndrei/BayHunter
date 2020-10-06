@@ -70,7 +70,7 @@ class RFminiModRF(object):
 
         mparams = {'z': z, 'vp': vp, 'vs': vs, 'rho': rho,
                    'qp': qp, 'qs': qs}
-        mparams = dict((a, b) for (a, b) in mparams.iteritems()
+        mparams = dict((a, b) for (a, b) in mparams.items()
                        if b is not None)
         pars = mparams.keys()
 

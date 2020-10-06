@@ -197,7 +197,7 @@ class PlotFromStorage(object):
         # add up to a collection of maxmodels models.
         nchains = int(len(self.likefiles[1]) - self.outliers.size)
         maxmodels = int(maxmodels)
-        mpc = maxmodels / nchains  # models per chain
+        mpc = int(maxmodels / nchains)  # models per chain
 
         # # open matrixes and vectors
         allmisfits = None
@@ -213,7 +213,7 @@ class PlotFromStorage(object):
             if cidx in self.outliers:
                 continue
 
-            index = np.arange(nmodels[i])
+            index = np.arange(nmodels[i]).astype(int)
             if nmodels[i] > mpc:
                 index = rstate.choice(index, mpc, replace=False)
                 index.sort()

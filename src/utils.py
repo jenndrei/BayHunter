@@ -14,7 +14,7 @@ from configobj import ConfigObj
 import matplotlib.pyplot as plt
 from scipy.optimize import least_squares
 
-rstate = np.random.RandomState(None)
+rstate = np.random.RandomState(333)
 
 
 class SerializingSocket(zmq.Socket):
